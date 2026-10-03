@@ -26,6 +26,13 @@
   /* ---------- session ---------- */
   P.me = null;
   P.guard = function (roles) {
+    if (new URLSearchParams(location.search).get('demo') === '1') {
+      P.me = { id: 'demo-doctor', role: 'doctor', name: 'Testing Doctor', email: 'demo@suga.health' };
+      var demoChip = document.querySelector('[data-user-chip]');
+      if (demoChip) demoChip.textContent = 'Testing Doctor · Doctor';
+      document.querySelectorAll('[data-admin-only]').forEach(function (el) { el.remove(); });
+      return Promise.resolve(P.me);
+    }
     return P.api('/api/auth/me').then(function (d) {
       P.me = d.user;
       if (roles && roles.indexOf(d.user.role) === -1) {
