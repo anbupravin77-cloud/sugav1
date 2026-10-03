@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<base href="/portal/">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Case &middot; Suga.health portal</title>
+<link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
+<link rel="stylesheet" href="../assets/styles.css">
+<link rel="stylesheet" href="portal.css">
+<style>
+  /* ---- page-specific (ppg-) ---- */
+  .ppg-back { display: inline-block; margin-bottom: 14px; color: var(--ink-soft); text-decoration: none; font-weight: 600; font-size: .9rem; }
+  .ppg-back:hover { color: var(--pen); }
+  .ppg-rail { position: sticky; top: 24px; padding: 22px 20px; }
+  .ppg-rail h3 { font-family: var(--font-body); font-size: .74rem; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--ink-faint); margin: 4px 0 2px; }
+  .ppg-rail .btn, .ppg-rail .btn--ghost { padding: 10px 16px; font-size: .92rem; }
+  .prail-actions .btn--ghost { width: 100%; }
+  .ppg-rail textarea.input { min-height: 96px; resize: vertical; font-size: .9rem; }
+  .ppg-div { border: none; border-top: 1.5px dashed var(--rule); margin: 10px 0 6px; width: 100%; }
+  .ppg-row { display: flex; gap: 8px; align-items: stretch; }
+  .ppg-row .select { flex: 1; min-width: 0; }
+  .ppg-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .ppg-chip { display: inline-flex; align-items: baseline; gap: 7px; border: 1.5px solid var(--rule); border-radius: 999px; padding: 5px 13px; font-weight: 600; font-size: .88rem; background: var(--paper); }
+  .ppg-chip .small { font-size: .72rem; color: var(--ink-faint); letter-spacing: .05em; }
+  .v--pen { font-family: var(--font-pen); color: var(--pen); font-weight: 600; font-size: 1.3rem; line-height: 1.25; transform: rotate(-1.5deg); display: inline-block; margin-top: 10px; }
+  .ppg-pre { white-space: pre-wrap; overflow-wrap: break-word; }
+  .ppg-muted { color: var(--ink-faint); }
+  .ppg-small { font-size: .8rem; }
+  .ppg-stamp-big .pstamp { font-size: .84rem; padding: 5px 14px; }
+  .ppg-plan-view { background: var(--paper-2); border: 1px solid var(--rule); border-radius: 8px; padding: 12px 14px; font-size: .92rem; }
+  .ppg-notes { max-height: 320px; overflow-y: auto; }
+  .ppg-skel { color: var(--ink-faint); padding: 40px 0; }
+  @media (max-width: 980px) { .ppg-rail { position: static; } }
+</style>
+</head>
+<body>
+<div class="pshell">
+  <aside class="prail">
+    <a class="brand" href="../index.html"><span class="brand-word">Suga.health</span></a>
+    <nav aria-label="Portal">
+      <a href="index.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16v14H4z"/><path d="M4 13h5l2 3h2l2-3h5"/></svg>
+        Worklist
+      </a>
+      <a href="admin.html" data-admin-only>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h.01a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v.01a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        Admin
+      </a>
+    </nav>
+    <div class="spacer"></div>
+    <div class="puser">
+      <span data-user-chip></span>
+      <button type="button" onclick="Portal.logout()">Sign out</button>
+    </div>
+  </aside>
+
+  <main class="pmain">
+    <a class="ppg-back" href="index.html">&larr; Back to worklist</a>
+    <div id="app"><div class="ppg-skel">Loading&hellip;</div></div>
+  </main>
+</div>
+
+<script src="portal.js"></script>
+<script>
+(function () {
+  'use strict';
+  var esc = Portal.esc;
+  var caseId = Portal.qs('id');
+  var app = document.getElementById('app');
+  var current = null;      // last rendered case
+  var doctors = null;      // admin only: /api/doctors
+  var noteDraft = '';
+  var planDraft = null;    // null = untouched, use template
+
+  /* ---------- boot ---------- */
+  Portal.guard().then(function (me) {
+    if (!caseId) { app.innerHTML = emptyState('No case id in the URL.'); return; }
+    var loads = [Portal.api('/api/cases/' + encodeURIComponent(caseId))];
+    if (me.role === 'admin') {
+      loads.push(Portal.api('/api/doctors').catch(function () { return null; }));
+    }
+    return Promise.all(loads).then(function (rs) {
+      if (rs[1]) doctors = rs[1].users || rs[1].doctors || (Array.isArray(rs[1]) ? rs[1] : []);
+      render(unwrap(rs[0]));
+    });
+  }).catch(function (e) {
+    app.innerHTML = emptyState(e.message || 'Could not load this case.');
+  });
+
+  function unwrap(d) { return d && d.case ? d.case : d; }
+  function refetch() {
+    return Portal.api('/api/cases/' + encodeURIComponent(caseId))
+      .then(function (d) { render(unwrap(d)); })
+      .catch(function (e) { Portal.toast(e.message, true); });
+  }
+  function emptyState(msg) {
+    return '<div class="pempty">' + esc(msg) +
+      '<span class="pen-note">this chart seems to be filed elsewhere&hellip;</span></div>';
+  }
+
+  /* ---------- mutations: always re-render from the server's copy ---------- */
+  function patchCase(body, okMsg) {
+    Portal.api('/api/cases/' + encodeURIComponent(caseId), { method: 'PATCH', body: body })
+      .then(function (d) { render(unwrap(d)); if (okMsg) Portal.toast(okMsg); })
+      .catch(function (e) { Portal.toast(e.message, true); refetch(); }); // 409 claim conflicts land here
+  }
+
+  /* ---------- plan templates (per goal) ---------- */
+  function planTemplate(c) {
+    var i = c.intake || {};
+    var first = String(i.name || 'there').trim().split(/\s+/)[0];
+    var dr = Portal.me ? Portal.me.name : '';
+    var bmi = i.bmi ? (i.bmi + (i.bmiBand ? ' (' + i.bmiBand + ')' : '')) : '[BMI]';
+    if (i.goal === 'weight-loss') {
+      return 'Hi ' + first + ',\n\n' +
+        'Thank you for completing your consultation — I have reviewed your full chart.\n' +
+        'Assessment: BMI ' + bmi + '. [Add relevant history / labs to order.]\n' +
+        'Plan: if screening stays clear, we can start a GLP-1 programme (e.g. semaglutide, titrated up from a low weekly dose) alongside the habit work below.\n' +
+        'Habits: protein-first meals, 7,000–10,000 steps daily, a consistent sleep window, and one weekly weigh-in — no daily scale-watching.\n' +
+        'Follow-up: progress review in 4 weeks; message us sooner if you have nausea that will not settle or any new symptoms.\n\n' +
+        'Dr ' + dr;
+    }
+    if (i.goal === 'hair-growth') {
+      return 'Hi ' + first + ',\n\n' +
+        'Thank you for your consultation — I have reviewed your chart.\n' +
+        'Assessment: pattern consistent with androgenic hair loss. [Adjust after photo review.]\n' +
+        'Plan: finasteride 1 mg daily (we will talk through the small risk of sexual side effects) plus minoxidil 5% applied to a dry scalp twice daily.\n' +
+        'Expectations: shedding slows by month 3; visible regrowth usually takes 4–6 months — consistency matters more than dose.\n' +
+        'Follow-up: progress photos and a review in 12 weeks; stop and message us if you notice mood changes or side effects.\n\n' +
+        'Dr ' + dr;
+    }
+    // sexual-health: screening first
+    return 'Hi ' + first + ',\n\n' +
+      'Thank you for the details you shared — a couple of screening steps come first.\n' +
+      'Before any ED medication I need to rule out cardiac risk: please confirm whether you get chest pain or breathlessness on exertion, and send a recent blood-pressure reading.\n' +
+      '[If any cardiac history or nitrate use: do NOT start a PDE5 inhibitor — specialist review first.]\n' +
+      'If screening is clear: sildenafil 50 mg about 1 hour before activity, at most once daily; avoid heavy meals and alcohol around dosing.\n' +
+      'Follow-up: check in after the first 2–4 uses so we can adjust the dose or switch to daily tadalafil if that suits you better.\n\n' +
+      'Dr ' + dr;
+  }
+
+  /* ---------- chart building blocks ---------- */
+  function section(title, inner) {
+    return '<div class="pchart-section"><h3>' + title + '</h3>' + inner + '</div>';
+  }
+  function kv(pairs) {
+    return '<div class="pkv">' + pairs.map(function (p) {
+      return '<div><div class="k">' + p[0] + '</div><div class="v">' + p[1] + '</div></div>';
+    }).join('') + '</div>';
+  }
+  function chips(items, codeKey) {
+    return '<div class="ppg-chips">' + items.map(function (it) {
+      if (typeof it === 'string') return '<span class="ppg-chip">' + esc(it) + '</span>';
+      return '<span class="ppg-chip">' + esc(it.name) +
+        (it[codeKey] ? ' <span class="small">' + esc(it[codeKey]) + '</span>' : '') + '</span>';
+    }).join('') + '</div>';
+  }
+  var NONE = '<div class="ppg-muted">None reported</div>';
+
+  function goalWarnings(i) {
+    var out = [];
+    var conds = i.conditions || [];
+    var names = conds.map(function (c) { return String(c && c.name || '').toLowerCase(); });
+    var codes = conds.map(function (c) { return c && c.code; });
+    var meds = (i.medications || []).map(function (m) { return String(m).toLowerCase(); });
+    if (i.goal === 'weight-loss' && names.some(function (n) {
+      return n.indexOf('thyroid cancer') !== -1 || n.indexOf('men2') !== -1;
+    })) {
+      out.push('History of medullary thyroid cancer / MEN2 — GLP-1 therapy contraindicated. Verify before planning.');
+    }
+    if (i.goal === 'sexual-health' && (
+      codes.indexOf('I25.10') !== -1 || codes.indexOf('I48.91') !== -1 ||
+      meds.some(function (m) { return m.indexOf('nitrate') !== -1; })
+    )) {
+      out.push('Cardiac history — screen before ED medication.');
+    }
+    return out;
+  }
+
+  function medAllergyOverlaps(i) {
+    var out = [];
+    (i.allergies || []).forEach(function (a) {
+      (i.medications || []).forEach(function (m) {
+        var al = String(a).toLowerCase().trim();
+        var ml = String(m).toLowerCase().trim();
+        if (al && ml && (ml.indexOf(al) !== -1 || al.indexOf(ml) !== -1)) {
+          out.push(esc(a) + ' / ' + esc(m));
+        }
+      });
+    });
+    return out;
+  }
+
+  var SCR_LABEL = {
+    married: 'Married', onOCP: 'On oral contraception (OCP)', pregnant: 'Pregnant',
+    antiepileptics: 'On treatment for epilepsy/seizures (fits)', pancreatitis: 'Pancreatitis or recurrent abdominal pain',
+    familyMTC: 'Family history of medullary thyroid cancer'
+  };
+  var COMORBID_LABEL = {
+    'type2-diabetes': 'Type 2 diabetes', hypertension: 'Hypertension', hyperlipidemia: 'Hyperlipidemia'
+  };
+  var COMPLIC_LABEL = {
+    kidney: 'Kidney problems', retinopathy: 'Visual problems (retinopathy)',
+    'heart-attack': 'Heart attack', stroke: 'Stroke'
+  };
+  var ANS = { yes: 'Yes', no: 'No', unknown: 'Not sure' };
+
+  function screeningHtml(c) {
+    var s = (c.intake || {}).screening;
+    if (!s) return '';
+    var a = c.assessment || {};
+    var out = '';
+
+    if (a.excluded) {
+      out += '<div class="pwarn"><b>Excluded from treatment — ' + esc(a.excluded.label) + '.</b> ' +
+        esc(a.excluded.why) + '</div>';
+    } else if (a.requiresPhysician) {
+      out += '<div class="pwarn"><b>Physician consult required.</b><ul style="margin:6px 0 0;padding-left:18px">' +
+        (a.flags || []).map(function (f) { return '<li>' + esc(f.label) + ' — ' + esc(f.why) + '</li>'; }).join('') +
+        '</ul></div>';
+    }
+
+    var order = ['pregnant', 'onOCP', 'married', 'antiepileptics', 'pancreatitis', 'familyMTC'];
+    var rows = [];
+    order.forEach(function (k) {
+      if (!s[k]) return;
+      var flagged = (k === 'pregnant' && s[k] === 'yes') ||
+        (k !== 'married' && (s[k] === 'yes' || s[k] === 'unknown'));
+      rows.push([SCR_LABEL[k], (flagged ? '<b style="color:var(--proof)">' : '<span>') +
+        esc(ANS[s[k]] || s[k]) + (flagged ? '</b>' : '</span>')]);
+    });
+    if ((s.comorbid || []).length) {
+      rows.push(['Co-morbidities', s.comorbid.map(function (k) { return esc(COMORBID_LABEL[k] || k); }).join(', ')]);
+    }
+    if ((s.diabetesComplications || []).length) {
+      rows.push(['Diabetes complications', '<b style="color:var(--proof)">' +
+        s.diabetesComplications.map(function (k) { return esc(COMPLIC_LABEL[k] || k); }).join(', ') + '</b>']);
+    }
+    if (!rows.length) return out;
+    return out + section('Protocol screening', kv(rows));
+  }
+
+  function chartHtml(c) {
+    var i = c.intake || {};
+    var out = '';
+
+    // AI clinical summary (on demand — never auto-run, never stored)
+    out += '<div class="pchart-section"><h3>At a glance</h3>' +
+      '<div id="aiSummary" class="ppg-muted ppg-small">Not generated.</div>' +
+      '<button type="button" class="btn btn--ghost" id="btnAiSummary" style="width:auto;margin-top:8px">Summarise with AI</button>' +
+      '</div>';
+
+    // protocol screening result first — flags and exclusions outrank everything else
+    out += screeningHtml(c);
+
+    // goal-specific contraindications
+    goalWarnings(i).forEach(function (w) { out += '<div class="pwarn">' + w + '</div>'; });
+
+    // Identity + how to reach the patient
+    var emailCell = i.email
+      ? '<a href="mailto:' + encodeURI(String(i.email)) + '">' + esc(i.email) + '</a>'
+      : '—';
+    var phoneCell = i.phone
+      ? '<a href="tel:' + encodeURI(String(i.phone).replace(/[^\d+]/g, '')) + '">' + esc(i.phone) + '</a>'
+      : '—';
+    out += section('Identity', kv([
+      ['Name', esc(i.name || '—')],
+      ['Age', i.age != null ? esc(i.age) : '—'],
+      ['Sex', esc(i.sex || '—') + (i.sexDetail ? ' <span class="ppg-muted">— ' + esc(i.sexDetail) + '</span>' : '')],
+      ['Email', emailCell],
+      ['Phone', phoneCell],
+    ]));
+
+    // Body
+    var bodyInner = kv([
+      ['Height', i.height && i.height.cm ? esc(i.height.cm) + ' cm' : '—'],
+      ['Weight', i.weight && i.weight.kg ? esc(i.weight.kg) + ' kg' : '—'],
+      ['BMI', i.bmi ? esc(i.bmi) + (i.bmiBand ? ' <span class="ppg-muted">· ' + esc(i.bmiBand) + '</span>' : '') : '—'],
+    ]);
+    if (i.potentialLoss && i.potentialLoss.lowKg != null) {
+      bodyInner += '<span class="v--pen">Potential loss: ' + esc(i.potentialLoss.lowKg) +
+        '–' + esc(i.potentialLoss.highKg) + ' kg</span>';
+    }
+    out += section('Body', bodyInner);
+
+    // Current conditions
+    var condInner = '';
+    var flags = Portal.flags(i.conditions);
+    if (flags.length) {
+      condInner += '<div class="pwarn">Red-flag history: ' + flags.map(esc).join(', ') + ' — review before prescribing.</div>';
+    }
+    condInner += (i.noConditions || !(i.conditions || []).length) ? NONE : chips(i.conditions, 'code');
+    out += section('Current conditions', condInner);
+
+    // Medications
+    out += section('Medications',
+      (i.noMedications || !(i.medications || []).length) ? NONE : chips(i.medications));
+
+    // Allergies
+    var allInner = '';
+    medAllergyOverlaps(i).forEach(function (pair) {
+      allInner += '<div class="pwarn">Possible medication–allergy overlap: ' + pair + ' — verify.</div>';
+    });
+    allInner += (i.allergies || []).length ? chips(i.allergies) : NONE;
+    out += section('Allergies', allInner);
+
+    // Surgical history
+    out += section('Surgical history',
+      i.surgical ? '<div class="ppg-pre">' + esc(i.surgical) + '</div>' : NONE);
+
+    // Family history
+    var famInner = (i.family || []).length ? chips(i.family) : NONE;
+    if (i.familyDetail) famInner += '<div class="ppg-muted" style="margin-top:8px">' + esc(i.familyDetail) + '</div>';
+    out += section('Family history', famInner);
+
+    // Patient note
+    out += section('Patient note',
+      i.otherInfo ? '<div class="ppg-pre">' + esc(i.otherInfo) + '</div>'
+                  : '<div class="ppg-muted">None provided</div>');
+
+    return '<section class="chart-card"><div class="chart-card__head">' +
+      '<span>Patient chart &mdash; confidential</span><span class="dot" aria-hidden="true"></span></div>' +
+      '<div class="chart-card__body">' + out + '</div></section>';
+  }
+
+  /* ---------- action rail ---------- */
+  function railHtml(c) {
+    var me = Portal.me || {};
+    var isAdmin = me.role === 'admin';
+    var out = '';
+
+    // STATUS
+    out += '<h3>Status</h3><div class="ppg-stamp-big">' + Portal.stamp(c.status) + '</div>';
+    out += '<div class="ppg-row"><select class="select" id="selStatus" aria-label="Change status">' +
+      Object.keys(Portal.STATUS).map(function (k) {
+        return '<option value="' + k + '"' + (k === c.status ? ' selected' : '') +
+          (k === 'plan_sent' && !c.plan ? ' disabled' : '') + '>' + Portal.STATUS[k].label + '</option>';
+      }).join('') +
+      '</select><button type="button" class="btn btn--ghost" style="width:auto" id="btnStatus">Apply</button></div>';
+    if (!c.plan) out += '<div class="ppg-muted ppg-small">“Plan sent” unlocks once a plan is recorded.</div>';
+
+    // ASSIGNMENT
+    out += '<hr class="ppg-div"><h3>Assignment</h3>';
+    if (!c.assignedTo) {
+      out += '<div class="ppg-muted">Unassigned</div>' +
+        '<button type="button" class="btn" id="btnClaim">Claim this case</button>';
+    } else if (c.assignedTo === me.uid || c.assignedTo === me.id) {
+      out += '<div>Assigned to <b>you</b></div>' +
+        '<button type="button" class="btn btn--ghost" id="btnRelease">Release case</button>';
+    } else {
+      out += '<div>Assigned to <b>' + esc(c.assignedName || 'another clinician') + '</b></div>';
+    }
+    if (isAdmin && doctors && doctors.length) {
+      out += '<div data-admin-only class="ppg-row" style="margin-top:6px">' +
+        '<select class="select" id="selAssign" aria-label="Assign to doctor">' +
+        '<option value="" selected disabled>Reassign to…</option>' +
+        doctors.filter(function (d) { return d.active !== false; }).map(function (d) {
+          return '<option value="' + esc(d.id) + '">' + esc(d.name) + '</option>';
+        }).join('') +
+        '</select><button type="button" class="btn btn--ghost" style="width:auto" id="btnAssign">Assign</button></div>';
+    }
+
+    // PRIORITY
+    out += '<button type="button" class="btn btn--ghost" id="btnPrio" style="margin-top:6px">' +
+      (c.priority ? 'Clear priority flag' : 'Flag as priority') + '</button>';
+
+    // CLINICAL NOTES
+    out += '<hr class="ppg-div"><h3>Clinical notes</h3>';
+    var notes = (c.notes || []).slice().sort(function (a, b) { return a.at < b.at ? 1 : -1; });
+    out += '<div class="ppg-notes">' + (notes.length ? notes.map(function (n) {
+      return '<div class="pnote-item"><div class="by">' + esc(n.authorName) + ' · ' + Portal.ago(n.at) +
+        '</div><div class="ppg-pre">' + esc(n.text) + '</div></div>';
+    }).join('') : '<div class="ppg-muted">No notes yet.</div>') + '</div>';
+    out += '<textarea class="input" id="txtNote" placeholder="Add a private clinical note…" aria-label="Add a private clinical note"></textarea>' +
+      '<button type="button" class="btn btn--ghost" id="btnNote">Add note</button>';
+
+    // PLAN
+    out += '<hr class="ppg-div"><h3>Plan</h3>';
+    if (c.plan) {
+      out += '<div class="ppg-plan-view ppg-pre">' + esc(c.plan.text) + '</div>' +
+        '<div class="ppg-muted ppg-small">Recorded by ' + esc(c.plan.authorName) + ' · ' + Portal.ago(c.plan.at) + '</div>';
+    } else if (c.status === 'closed') {
+      out += '<div class="ppg-muted">This case is closed without a plan. Reopen it before recording one.</div>';
+    } else {
+      out += '<textarea class="input" id="txtPlan" style="min-height:220px" aria-label="Plan for the patient"></textarea>' +
+        '<div class="prx-actions">' +
+        '<button type="button" class="btn" id="btnPlan">Record plan &amp; mark sent</button>' +
+        '<button type="button" class="btn btn--ghost" style="width:auto" id="btnAiLetter">Draft with AI</button>' +
+        '</div>' +
+        '<div class="ppg-muted ppg-small">AI writes the wording only &mdash; the medicine and dose come from the protocol. Read and edit before saving.</div>';
+    }
+
+    // PRESCRIPTION (protocol step 6)
+    out += '<hr class="ppg-div"><h3>Prescription</h3>';
+    var a = c.assessment || {};
+    var rx = c.prescription;
+    if (a.excluded) {
+      out += '<div class="ppg-muted">No prescription can be issued — patient excluded (' +
+        esc(a.excluded.label) + ').</div>';
+    } else if (rx) {
+      out += '<div class="prx-card">' +
+        '<h4>' + (rx.status === 'approved' ? 'Approved' : 'Draft — needs your approval') +
+        ' · prescription #' + esc(rx.number) + '</h4>' +
+        '<div class="drug">' + esc(rx.drug) + ' &mdash; ' + esc(rx.dose) + '</div>' +
+        (rx.instructions ? '<div class="ppg-small">' + esc(rx.instructions) + '</div>' : '') +
+        '<ul>' + (rx.minorSideEffects || []).map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul>' +
+        '<div class="ppg-small" style="margin-top:8px">' + esc(rx.urgentAdvice || '') + '</div>' +
+        '<div class="ppg-small">' + esc(rx.reviewInstruction || '') + '</div>' +
+        '<div class="ppg-muted ppg-small" style="margin-top:8px">' + esc(rx.reason || '') + '</div>' +
+        (rx.status === 'approved'
+          ? '<div class="ppg-muted ppg-small">Approved by ' + esc(rx.approvedBy) + ' · ' + Portal.ago(rx.approvedAt) + '</div>'
+          : '') +
+        '</div>';
+      if (rx.status === 'draft') {
+        out += '<div class="prx-actions">' +
+          '<button type="button" class="btn" id="btnRxApprove">Approve &amp; issue</button>' +
+          '<button type="button" class="btn btn--ghost" style="width:auto" id="btnRxDiscard">Discard</button>' +
+          '</div>' +
+          '<div class="ppg-muted ppg-small">Nothing reaches the patient until you approve it.</div>';
+      }
+    } else {
+      out += '<div class="ppg-muted">No prescription drafted.</div>' +
+        '<button type="button" class="btn btn--ghost" id="btnRxDraft">Draft from protocol</button>';
+    }
+
+    // MONTHLY REVIEW (protocol steps 6–7)
+    if (rx && rx.status === 'approved') {
+      out += '<hr class="ppg-div"><h3>Monthly review</h3>';
+      var reviews = (c.reviews || []).slice().sort(function (x, y) { return x.at < y.at ? 1 : -1; });
+      if (reviews.length) {
+        out += '<div class="ppg-notes">' + reviews.map(function (r) {
+          var verdict = r.outcome === 'physician-consult' ? 'severe symptoms — dosage review'
+            : r.outcome === 'dose-escalated' ? 'no severe symptoms — dose escalated'
+            : 'at final dose step';
+          return '<div class="pnote-item"><div class="by">Review ' + esc(r.n) + ' · ' + esc(r.by) + ' · ' + Portal.ago(r.at) +
+            '</div><div>' + esc(verdict) + '</div>' +
+            (r.weightKg || r.pulse || r.bp
+              ? '<div class="ppg-small ppg-muted">' +
+                (r.weightKg ? 'Weight ' + esc(r.weightKg) + ' kg · ' : '') +
+                (r.pulse ? 'Pulse ' + esc(r.pulse) + ' · ' : '') +
+                (r.bp ? 'BP ' + esc(r.bp) : '') + '</div>'
+              : '') +
+            (r.notes ? '<div class="ppg-pre ppg-small">' + esc(r.notes) + '</div>' : '') +
+            '</div>';
+        }).join('') + '</div>';
+      }
+      out += '<div class="ppg-small" style="margin-bottom:6px">Record this month&rsquo;s review:</div>' +
+        '<div class="ppg-row"><input class="input" id="rvWeight" type="number" step="0.1" placeholder="Weight kg" aria-label="Weight in kg">' +
+        '<input class="input" id="rvPulse" type="number" placeholder="Pulse" aria-label="Pulse"></div>' +
+        '<input class="input" id="rvBp" type="text" placeholder="Blood pressure, e.g. 128/82" aria-label="Blood pressure" style="margin-top:8px">' +
+        '<label class="ppg-check" style="display:flex;gap:10px;align-items:center;margin-top:10px">' +
+        '<input type="checkbox" id="rvSympt"> Any abdominal symptoms?</label>' +
+        '<label class="ppg-check" id="rvSevereWrap" hidden style="display:flex;gap:10px;align-items:center;margin-top:6px">' +
+        '<input type="checkbox" id="rvSevere"> Are they severe?</label>' +
+        '<textarea class="input" id="rvNotes" placeholder="Review notes (optional)" aria-label="Review notes" style="margin-top:8px"></textarea>' +
+        '<button type="button" class="btn btn--ghost" id="btnReview">Record review</button>' +
+        '<div class="ppg-muted ppg-small">No severe symptoms escalates the dose and drafts the next prescription. Severe symptoms flag the case for a dosage review instead.</div>';
+    }
+
+    // AUDIT
+    out += '<hr class="ppg-div"><h3>Audit trail</h3>';
+    var audit = (c.audit || []).slice().sort(function (a, b) { return a.at < b.at ? 1 : -1; });
+    out += '<div class="paudit">' + (audit.length ? audit.map(function (a) {
+      return '<div>' + esc(a.who) + ' — ' + esc(a.action) + ' — ' + Portal.ago(a.at) + '</div>';
+    }).join('') : '<div>No activity yet.</div>') + '</div>';
+
+    return '<aside class="card ppg-rail"><div class="prail-actions">' + out + '</div></aside>';
+  }
+
+  /* ---------- render + wire ---------- */
+  function render(c) {
+    if (!c || !c.id) { app.innerHTML = emptyState('Could not find that case.'); return; }
+    current = c;
+    var i = c.intake || {};
+    document.title = (i.name || c.ref || 'Case') + ' · Suga.health portal';
+
+    var goalLabel = Portal.GOALS[i.goal] || i.goal || '';
+    app.innerHTML =
+      '<div class="phead">' +
+        '<h1>' + esc(i.name || 'Unknown patient') + ' ' + Portal.stamp(c.status) +
+          (c.priority ? ' <span class="pprio">&#9650; PRIORITY</span>' : '') + '</h1>' +
+        '<div class="sub">' + esc(c.ref || '') + ' · ' + esc(goalLabel) +
+          ' · received ' + Portal.ago(c.createdAt) + '</div>' +
+      '</div>' +
+      '<div class="pcase-grid">' + chartHtml(c) + railHtml(c) + '</div>';
+
+    wire(c);
+  }
+
+  function wire(c) {
+    var el = function (id) { return document.getElementById(id); };
+
+    if (el('btnStatus')) el('btnStatus').addEventListener('click', function () {
+      var v = el('selStatus').value;
+      if (v === c.status) { Portal.toast('Status unchanged'); return; }
+      patchCase({ action: 'status', status: v }, 'Status updated');
+    });
+
+    if (el('btnClaim')) el('btnClaim').addEventListener('click', function () {
+      patchCase({ action: 'claim' }, 'Claimed');
+    });
+    if (el('btnRelease')) el('btnRelease').addEventListener('click', function () {
+      patchCase({ action: 'release' }, 'Released');
+    });
+    if (el('btnAssign')) el('btnAssign').addEventListener('click', function () {
+      var v = el('selAssign').value;
+      if (!v) { Portal.toast('Pick a doctor first', true); return; }
+      patchCase({ action: 'assign', doctorId: v }, 'Reassigned');
+    });
+
+    if (el('btnPrio')) el('btnPrio').addEventListener('click', function () {
+      patchCase({ action: 'priority', priority: !c.priority },
+        c.priority ? 'Priority cleared' : 'Marked priority');
+    });
+
+    var txtNote = el('txtNote');
+    if (txtNote) {
+      txtNote.value = noteDraft;
+      txtNote.addEventListener('input', function () { noteDraft = txtNote.value; });
+      el('btnNote').addEventListener('click', function () {
+        var text = txtNote.value.trim();
+        if (!text) { Portal.toast('Write a note first', true); return; }
+        Portal.api('/api/cases/' + encodeURIComponent(caseId) + '/notes', { method: 'POST', body: { text: text } })
+          .then(function (d) { noteDraft = ''; render(unwrap(d)); Portal.toast('Note added'); })
+          .catch(function (e) { Portal.toast(e.message, true); refetch(); });
+      });
+    }
+
+    var txtPlan = el('txtPlan');
+    if (txtPlan) {
+      txtPlan.value = planDraft != null ? planDraft : planTemplate(c);
+      txtPlan.addEventListener('input', function () { planDraft = txtPlan.value; });
+      el('btnPlan').addEventListener('click', function () {
+        var text = txtPlan.value.trim();
+        if (!text) { Portal.toast('The plan is empty', true); return; }
+        Portal.api('/api/cases/' + encodeURIComponent(caseId) + '/plan', { method: 'POST', body: { text: text } })
+          .then(function (d) { planDraft = null; render(unwrap(d)); Portal.toast('Plan recorded'); })
+          .catch(function (e) { Portal.toast(e.message, true); refetch(); });
+      });
+    }
+
+    /* ---- AI drafting (prose only; never decides drug, dose or eligibility) ---- */
+    function aiDraft(kind, btn, onText) {
+      var label = btn.textContent;
+      btn.disabled = true; btn.textContent = 'Drafting…';
+      Portal.api('/api/cases/' + encodeURIComponent(caseId) + '/ai-draft', { method: 'POST', body: { kind: kind } })
+        .then(function (d) {
+          onText(d.text);
+          (d.warnings || []).forEach(function (w) { Portal.toast(w, true); });
+          Portal.toast('AI draft ready — check it before saving');
+        })
+        .catch(function (e) { Portal.toast(e.message, true); })
+        .then(function () { btn.disabled = false; btn.textContent = label; });
+    }
+    if (el('btnAiSummary')) el('btnAiSummary').addEventListener('click', function () {
+      var box = el('aiSummary');
+      aiDraft('summary', this, function (text) {
+        box.className = 'ppg-pre';
+        box.textContent = text;
+        var tag = document.createElement('div');
+        tag.className = 'ppg-muted ppg-small';
+        tag.textContent = 'AI-generated summary — not a clinical assessment. Read the full chart below.';
+        box.appendChild(tag);
+      });
+    });
+    if (el('btnAiLetter')) el('btnAiLetter').addEventListener('click', function () {
+      var ta = el('txtPlan');
+      aiDraft('letter', this, function (text) { ta.value = text; planDraft = text; ta.focus(); });
+    });
+
+    /* ---- prescription (protocol step 6) ---- */
+    function rxAction(body, okMsg, confirmMsg) {
+      if (confirmMsg && !window.confirm(confirmMsg)) return;
+      Portal.api('/api/cases/' + encodeURIComponent(caseId) + '/prescription', { method: 'POST', body: body })
+        .then(function (d) { render(unwrap(d)); Portal.toast(okMsg); })
+        .catch(function (e) { Portal.toast(e.message, true); });
+    }
+    if (el('btnRxDraft')) el('btnRxDraft').addEventListener('click', function () {
+      rxAction({ action: 'draft' }, 'Prescription drafted');
+    });
+    if (el('btnRxApprove')) el('btnRxApprove').addEventListener('click', function () {
+      var rx = c.prescription || {};
+      rxAction({ action: 'approve' }, 'Prescription approved',
+        'Approve and issue ' + rx.drug + ' ' + rx.dose + ' for ' + ((c.intake || {}).name || 'this patient') + '?');
+    });
+    if (el('btnRxDiscard')) el('btnRxDiscard').addEventListener('click', function () {
+      rxAction({ action: 'discard' }, 'Draft discarded', 'Discard this draft prescription?');
+    });
+
+    /* ---- monthly review (protocol steps 6–7) ---- */
+    var sympt = el('rvSympt'), severeWrap = el('rvSevereWrap');
+    if (sympt && severeWrap) {
+      sympt.addEventListener('change', function () {
+        severeWrap.hidden = !sympt.checked;
+        if (!sympt.checked && el('rvSevere')) el('rvSevere').checked = false;
+      });
+    }
+    if (el('btnReview')) el('btnReview').addEventListener('click', function () {
+      var body = {
+        abdominalSymptoms: !!(sympt && sympt.checked),
+        severe: !!(el('rvSevere') && el('rvSevere').checked),
+        weightKg: el('rvWeight') && el('rvWeight').value ? Number(el('rvWeight').value) : null,
+        pulse: el('rvPulse') && el('rvPulse').value ? Number(el('rvPulse').value) : null,
+        bp: el('rvBp') ? el('rvBp').value : '',
+        notes: el('rvNotes') ? el('rvNotes').value : ''
+      };
+      Portal.api('/api/cases/' + encodeURIComponent(caseId) + '/review', { method: 'POST', body: body })
+        .then(function (d) {
+          var updated = unwrap(d);
+          render(updated);
+          var last = (updated.reviews || [])[(updated.reviews || []).length - 1] || {};
+          Portal.toast(last.outcome === 'physician-consult'
+            ? 'Review recorded — flagged for dosage review'
+            : last.outcome === 'dose-escalated'
+              ? 'Review recorded — dose escalated, next prescription drafted'
+              : 'Review recorded');
+        })
+        .catch(function (e) { Portal.toast(e.message, true); });
+    });
+  }
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+<base href="/portal/">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Worklist — Suga.health Portal</title>
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../assets/styles.css">
+  <link rel="stylesheet" href="portal.css">
+  <style>
+    .ppg-unassigned { color: var(--pen); font-weight: 600; }
+    .ppg-sla-quiet { background: var(--rule); color: var(--ink-soft); }
+    .ppg-btn-sm { padding: 9px 18px; font-size: .9rem; }
+  </style>
+</head>
+<body>
+<div class="pshell">
+  <aside class="prail">
+    <a class="brand" href="../index.html"><span class="brand-word">Suga.health</span></a>
+    <nav aria-label="Portal">
+      <a href="index.html" class="is-active">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16v14H4z"/><path d="M4 13h5l2 3h2l2-3h5"/></svg>
+        Worklist
+      </a>
+      <a href="admin.html" data-admin-only>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h.01a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v.01a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        Admin
+      </a>
+    </nav>
+    <div class="spacer"></div>
+    <div class="puser">
+      <span data-user-chip></span>
+      <button type="button" onclick="Portal.logout()">Sign out</button>
+    </div>
+  </aside>
+
+  <main class="pmain">
+    <div class="phead">
+      <h1>Worklist</h1>
+      <div class="sub" id="ppg-live">Loading…</div>
+    </div>
+
+    <div class="ptabs" id="ppg-tabs" role="tablist"></div>
+
+    <div class="pfilters">
+      <input class="input" type="search" id="ppg-q" placeholder="Search name or ref…" aria-label="Search name or ref" autocomplete="off">
+      <select class="select" id="ppg-goal" aria-label="Filter by goal">
+        <option value="">All goals</option>
+      </select>
+      <button type="button" class="btn btn--ghost ppg-btn-sm" id="ppg-refresh">Refresh</button>
+    </div>
+
+    <div id="ppg-list"><div class="pempty">Loading…</div></div>
+  </main>
+</div>
+
+<script src="portal.js"></script>
+<script>
+(function () {
+  'use strict';
+  var esc = Portal.esc;
+
+  var TABS = [
+    { key: 'inbox',  label: 'Inbox',     params: { status: 'new' } },
+    { key: 'mine',   label: 'Mine',      params: { mine: '1', status: 'in_review,awaiting_patient' } },
+    { key: 'plan',   label: 'Plan sent', params: { status: 'plan_sent' } },
+    { key: 'open',   label: 'All open',  params: { status: 'new,in_review,awaiting_patient' } },
+    { key: 'closed', label: 'Closed',    params: { status: 'closed' } },
+  ];
+  var EMPTY = {
+    inbox:  { head: 'Inbox zero.', note: 'go be a doctor somewhere else for a while' },
+    mine:   { head: 'Nothing claimed right now.', note: 'grab something from the inbox' },
+    plan:   { head: 'No plans sent yet.', note: 'they will land here once you hit send' },
+    open:   { head: 'No open cases.', note: 'the waiting room is empty' },
+    closed: { head: 'Nothing closed yet.', note: 'finished charts file themselves here' },
+  };
+
+  var state = { tab: 'inbox', q: '', goal: '' };
+  var counts = {};
+  var fetchSeq = 0;
+  var els = {};
+
+  /* ---------- URL hash state (refresh-safe) ---------- */
+  function readHash() {
+    var h = new URLSearchParams(location.hash.replace(/^#/, ''));
+    var tab = h.get('tab');
+    if (tab && TABS.some(function (t) { return t.key === tab; })) state.tab = tab;
+    state.q = h.get('q') || '';
+    state.goal = h.get('goal') || '';
+  }
+  function writeHash() {
+    var h = new URLSearchParams();
+    if (state.tab !== 'inbox') h.set('tab', state.tab);
+    if (state.q) h.set('q', state.q);
+    if (state.goal) h.set('goal', state.goal);
+    var s = h.toString();
+    history.replaceState(null, '', s ? '#' + s : location.pathname + location.search);
+  }
+
+  /* ---------- counts ---------- */
+  function countFor(key) {
+    if (counts[key] != null) return counts[key];
+    if (key === 'inbox' && counts.new != null) return counts.new;
+    if (key === 'plan' && counts.plan_sent != null) return counts.plan_sent;
+    if (key === 'open') {
+      if (counts.all_open != null) return counts.all_open;
+      if (counts.new != null || counts.in_review != null || counts.awaiting_patient != null) {
+        return (counts.new || 0) + (counts.in_review || 0) + (counts.awaiting_patient || 0);
+      }
+    }
+    return null;
+  }
+
+  /* ---------- tab bar ---------- */
+  function renderTabs() {
+    els.tabs.innerHTML = TABS.map(function (t) {
+      var n = countFor(t.key);
+      return '<button type="button" role="tab" data-tab="' + t.key + '"' +
+        (t.key === state.tab ? ' class="is-active" aria-selected="true"' : ' aria-selected="false"') + '>' +
+        esc(t.label) + (n != null ? ' <span class="count">' + esc(String(n)) + '</span>' : '') +
+        '</button>';
+    }).join('');
+  }
+
+  function renderLive() {
+    var waiting = countFor('inbox');
+    var mine = countFor('mine');
+    els.live.textContent =
+      (waiting == null ? '—' : waiting) + ' waiting · your open cases: ' + (mine == null ? '—' : mine);
+  }
+
+  /* ---------- case rows ---------- */
+  function countOf(a, b) {
+    var v = a != null ? a : b;
+    if (v == null) return null;
+    if (Array.isArray(v)) return v.length;
+    var n = Number(v);
+    return isNaN(n) ? null : n;
+  }
+
+  function rowHtml(c) {
+    /* /api/cases returns flat summary objects; tolerate a wrapped shape too */
+    var s = c.summary || c;
+    var it = c.intake || {};
+    var name = s.name || it.name || 'Unknown patient';
+    var flags = s.flags || Portal.flags(it.conditions) || [];
+
+    var who = '<div class="who">' + esc(name) + ' ' + Portal.stamp(c.status) +
+      (c.priority ? ' <span class="pprio">PRIORITY</span>' : '') +
+      (s.excluded ? ' <span class="pconsult">Excluded</span>'
+        : s.requiresPhysician ? ' <span class="pconsult">Physician consult</span>' : '') +
+      (s.rxStatus === 'draft' ? ' <span class="prx">Rx draft #' + esc(s.rxNumber || 1) + '</span>'
+        : s.rxStatus === 'approved' ? ' <span class="prx prx--approved">Rx #' + esc(s.rxNumber || 1) + '</span>' : '') +
+      flags.map(function (f) { return ' <span class="pflag">' + esc(f) + '</span>'; }).join('') +
+      '</div>';
+
+    var parts = [];
+    var goal = s.goal || it.goal;
+    if (goal) parts.push(esc(Portal.GOALS[goal] || goal));
+    var age = s.age != null ? s.age : it.age;
+    var sex = s.sex || it.sex || '';
+    var sexShort = ({ male: 'M', female: 'F' })[String(sex).toLowerCase()] || sex;
+    if (age != null && age !== '') parts.push(esc(String(age)) + (sexShort ? '/' + esc(String(sexShort)) : ''));
+    var bmi = s.bmi != null ? s.bmi : it.bmi;
+    if (bmi != null && !isNaN(Number(bmi))) {
+      var band = s.bmiBand || it.bmiBand || Portal.bmiBand(Number(bmi));
+      parts.push('BMI <b>' + Number(bmi).toFixed(1) + '</b>' + (band ? ' (' + esc(band) + ')' : ''));
+    }
+    var nc = countOf(s.conditionCount != null ? s.conditionCount : s.conditions, it.conditions);
+    if (nc != null) parts.push('conditions <b>' + nc + '</b>');
+    var nm = countOf(s.medicationCount != null ? s.medicationCount : (s.medications != null ? s.medications : s.meds), it.medications);
+    if (nm != null) parts.push('meds <b>' + nm + '</b>');
+    var na = countOf(s.allergyCount != null ? s.allergyCount : s.allergies, it.allergies);
+    if (na != null) parts.push('allergies <b>' + na + '</b>');
+    parts.push(c.assignedName
+      ? 'assigned to <b>' + esc(c.assignedName) + '</b>'
+      : '<span class="ppg-unassigned">unassigned</span>');
+    var meta = '<div class="meta">' + parts.map(function (p) { return '<span>' + p + '</span>'; }).join('') + '</div>';
+
+    var slaCls = Portal.slaClass(c.createdAt, c.status) || 'ppg-sla-quiet';
+    var right = '<div class="right">' +
+      '<span class="sla ' + slaCls + '">' + esc(Portal.ago(c.createdAt)) + '</span>' +
+      '<span class="small">' + esc(c.ref || '') + '</span>' +
+      '</div>';
+
+    return '<a class="pcase" href="case.html?id=' + encodeURIComponent(c.id) + '">' +
+      '<div>' + who + meta + '</div>' + right + '</a>';
+  }
+
+  function renderList(cases) {
+    if (!cases.length) {
+      var e = EMPTY[state.tab] || EMPTY.open;
+      var filtered = state.q || state.goal;
+      els.list.innerHTML = '<div class="pempty">' +
+        (filtered ? 'No cases match your filters.' : esc(e.head)) +
+        '<span class="pen-note">' + (filtered ? 'try widening the search' : esc(e.note)) + '</span>' +
+        '</div>';
+      return;
+    }
+    cases = cases.slice().sort(function (a, b) {
+      return a.id < b.id ? 1 : a.id > b.id ? -1 : 0; // epoch-prefixed ids → newest first
+    });
+    els.list.innerHTML = cases.map(rowHtml).join('');
+  }
+
+  /* ---------- data ---------- */
+  function load(quiet) {
+    var seq = ++fetchSeq;
+    if (!quiet) els.list.innerHTML = '<div class="pempty">Loading…</div>';
+    var tab = TABS.filter(function (t) { return t.key === state.tab; })[0] || TABS[0];
+    var usp = new URLSearchParams(tab.params);
+    if (state.q) usp.set('q', state.q);
+    if (state.goal) usp.set('goal', state.goal);
+    usp.set('limit', '200');
+    Portal.api('/api/cases?' + usp.toString()).then(function (data) {
+      if (seq !== fetchSeq) return; // stale response
+      counts = data.counts || {};
+      var cases = data.cases || data.items || (Array.isArray(data) ? data : []);
+      renderTabs();
+      renderLive();
+      renderList(cases);
+    }).catch(function (e) {
+      if (seq !== fetchSeq) return;
+      if (!quiet) els.list.innerHTML = '<div class="pempty">Could not load the worklist.<span class="pen-note">try refresh</span></div>';
+      Portal.toast(e.message || 'Could not load cases.', true);
+    });
+  }
+
+  /* ---------- wiring ---------- */
+  function bind() {
+    els.tabs.addEventListener('click', function (ev) {
+      var btn = ev.target.closest('button[data-tab]');
+      if (!btn || btn.dataset.tab === state.tab) return;
+      state.tab = btn.dataset.tab;
+      writeHash(); renderTabs(); load();
+    });
+
+    var deb;
+    els.q.addEventListener('input', function () {
+      clearTimeout(deb);
+      deb = setTimeout(function () {
+        state.q = els.q.value.trim();
+        writeHash(); load();
+      }, 300);
+    });
+
+    els.goal.addEventListener('change', function () {
+      state.goal = els.goal.value;
+      writeHash(); load();
+    });
+
+    els.refresh.addEventListener('click', function () { load(); });
+
+    setInterval(function () { if (!document.hidden) load(true); }, 60000);
+    document.addEventListener('visibilitychange', function () { if (!document.hidden) load(true); });
+  }
+
+  /* ---------- boot ---------- */
+  Portal.guard().then(function () {
+    els.tabs = document.getElementById('ppg-tabs');
+    els.list = document.getElementById('ppg-list');
+    els.live = document.getElementById('ppg-live');
+    els.q = document.getElementById('ppg-q');
+    els.goal = document.getElementById('ppg-goal');
+    els.refresh = document.getElementById('ppg-refresh');
+
+    Object.keys(Portal.GOALS).forEach(function (k) {
+      var o = document.createElement('option');
+      o.value = k; o.textContent = Portal.GOALS[k];
+      els.goal.appendChild(o);
+    });
+
+    readHash();
+    els.q.value = state.q;
+    els.goal.value = state.goal;
+    renderTabs();
+    bind();
+    load();
+  }).catch(function () { /* guard redirects */ });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<base href="/portal/">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Admin — Suga.health Portal</title>
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../assets/styles.css">
+<link rel="stylesheet" href="portal.css">
+<style>
+  .ppg-sec { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; margin: 34px 0 16px; flex-wrap: wrap; }
+  .ppg-sec h2 { font-size: 1.25rem; margin: 0; }
+  .ppg-sec:first-of-type { margin-top: 0; }
+  .ppg-mini { grid-template-columns: repeat(3, 1fr); margin-top: -12px; }
+  .ppg-mini .pstat .n { font-size: 1.4rem; }
+  .ppg-form { margin-bottom: 18px; }
+  .ppg-checks { display: flex; gap: 18px; flex-wrap: wrap; }
+  .ppg-checks label { display: inline-flex; align-items: center; gap: 8px; font-weight: 600; font-size: .95rem; cursor: pointer; }
+  .ppg-checks input { width: 16px; height: 16px; accent-color: var(--pen); }
+  .ppg-actions { display: flex; gap: 14px; align-items: center; margin-top: 6px; }
+  .ppg-callout { margin: 0 0 18px; }
+  .ppg-callout .ppg-pass { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-weight: 700; font-size: 1.05rem; background: var(--card); border: 1px dashed var(--pen); border-radius: 6px; padding: 3px 10px; letter-spacing: .04em; }
+  .ppg-callout p { margin: 8px 0 0; font-size: .9rem; color: var(--ink-soft); }
+  .ppg-row { cursor: pointer; }
+  .ppg-row:hover td { background: rgba(194, 65, 12, .05); }
+  .ppg-inactive td { opacity: .55; }
+  .ppg-act { color: var(--pen); font-size: .88rem; padding: 4px 6px; }
+  .ppg-act:hover { color: var(--pen-deep, var(--pen)); text-decoration: underline; text-underline-offset: 3px; }
+  .ppg-loading { color: var(--ink-faint); padding: 22px 4px; font-size: .95rem; }
+  @media (max-width: 760px) { .ppg-mini { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<div class="pshell">
+
+  <aside class="prail">
+    <a class="brand" href="../index.html"><span class="brand-word">Suga.health</span></a>
+    <nav aria-label="Portal">
+      <a href="index.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16v14H4z"/><path d="M4 13h5l2 3h2l2-3h5"/></svg>
+        Worklist
+      </a>
+      <a href="admin.html" class="is-active" data-admin-only>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h.01a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v.01a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        Admin
+      </a>
+    </nav>
+    <div class="spacer"></div>
+    <div class="puser">
+      <span data-user-chip></span>
+      <button type="button" onclick="Portal.logout()">Sign out</button>
+    </div>
+  </aside>
+
+  <main class="pmain">
+    <div class="phead">
+      <h1>Admin</h1>
+      <span class="sub" id="todayLine"></span>
+    </div>
+
+    <!-- ============ Section 1: Today ============ -->
+    <section aria-labelledby="secToday">
+      <div class="ppg-sec"><h2 id="secToday">Today</h2></div>
+      <div class="pstats" id="statTiles">
+        <div class="pstat"><div class="n">…</div><div class="l">Waiting</div></div>
+        <div class="pstat"><div class="n">…</div><div class="l">New today</div></div>
+        <div class="pstat"><div class="n">…</div><div class="l">Avg hours to plan</div></div>
+        <div class="pstat"><div class="n">…</div><div class="l">Within 24h</div></div>
+      </div>
+      <div class="pstats ppg-mini" id="goalTiles"></div>
+    </section>
+
+    <!-- ============ Section 2: Care team ============ -->
+    <section aria-labelledby="secTeam">
+      <div class="ppg-sec">
+        <h2 id="secTeam">Care team</h2>
+        <button type="button" class="btn" id="addBtn">Add doctor</button>
+      </div>
+
+      <div class="chart-card ppg-form" id="addCard" hidden>
+        <div class="chart-card__head"><span>New doctor</span><span class="dot"></span></div>
+        <div class="chart-card__body">
+          <div class="field-row">
+            <div class="field">
+              <label class="label" for="dName">Full name <span class="req">*</span></label>
+              <input class="input" id="dName" type="text" autocomplete="off" placeholder="Dr. Jane Doe">
+            </div>
+            <div class="field">
+              <label class="label" for="dEmail">Email <span class="req">*</span></label>
+              <input class="input" id="dEmail" type="email" autocomplete="off" placeholder="jane@suga.health">
+            </div>
+          </div>
+          <div class="field">
+            <span class="label">Specialties (goals they cover)</span>
+            <div class="ppg-checks" id="dGoals"></div>
+          </div>
+          <div class="ppg-actions">
+            <button type="button" class="btn" id="createBtn">Create doctor</button>
+            <button type="button" class="btn-back" id="cancelAdd">Cancel</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="calloutSlot"></div>
+
+      <div class="ptable-wrap">
+        <table class="ptable">
+          <thead>
+            <tr><th>Name</th><th>Email</th><th>Specialties</th><th>Open cases</th><th>Status</th><th>Actions</th></tr>
+          </thead>
+          <tbody id="docRows">
+            <tr><td colspan="6" class="ppg-loading">Loading…</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div id="docEmpty"></div>
+    </section>
+
+    <!-- ============ Section 3: Prescribing protocol ============ -->
+    <section aria-labelledby="secProto">
+      <div class="ppg-sec"><h2 id="secProto">Prescribing protocol</h2></div>
+      <div class="card" id="protoCard">
+        <p class="ppg-loading" id="protoLoading">Loading…</p>
+        <div id="protoForm" hidden>
+          <p class="small" style="margin-top:0">
+            Set the drug and the dose ladder used by the standing protocol. When a consultation
+            comes in with no red flags, the system drafts the next prescription from this ladder &mdash;
+            a doctor still has to approve every one before it reaches the patient.
+          </p>
+          <div class="field">
+            <label class="label" for="pDrug">Drug</label>
+            <input class="input" id="pDrug" type="text" placeholder="e.g. the GLP-1 your clinic prescribes">
+          </div>
+          <div class="field">
+            <span class="label">Dose ladder <span class="small" style="text-transform:none;letter-spacing:0">(step 1 is the starting dose; each monthly review escalates one step)</span></span>
+            <div id="ladderRows"></div>
+            <button type="button" class="btn btn--ghost" id="btnAddStep" style="width:auto">+ Add dose step</button>
+          </div>
+          <div class="field">
+            <label class="label" for="pInterval">Review interval (days)</label>
+            <input class="input" id="pInterval" type="number" min="1" max="365" style="max-width:160px">
+          </div>
+          <div class="field">
+            <label class="label" for="pSide">Minor side effects printed on the prescription <span class="small" style="text-transform:none;letter-spacing:0">(one per line)</span></label>
+            <textarea class="input" id="pSide" rows="5"></textarea>
+          </div>
+          <div class="field">
+            <label class="label" for="pUrgent">Urgent advice</label>
+            <textarea class="input" id="pUrgent" rows="2"></textarea>
+          </div>
+          <div class="field">
+            <label class="label" for="pReview">Review instruction</label>
+            <textarea class="input" id="pReview" rows="2"></textarea>
+          </div>
+          <button type="button" class="btn" id="btnSaveProto">Save protocol</button>
+          <p class="small" id="protoMeta" style="margin:10px 0 0"></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ Section 4: All cases ============ -->
+    <section aria-labelledby="secCases">
+      <div class="ppg-sec"><h2 id="secCases">All cases</h2></div>
+      <div class="pfilters">
+        <select class="select" id="fStatus" aria-label="Filter by status">
+          <option value="">All statuses</option>
+          <option value="new">New</option>
+          <option value="in_review">In review</option>
+          <option value="awaiting_patient">Awaiting patient</option>
+          <option value="plan_sent">Plan sent</option>
+          <option value="closed">Closed</option>
+        </select>
+        <select class="select" id="fGoal" aria-label="Filter by goal"></select>
+      </div>
+      <div class="ptable-wrap">
+        <table class="ptable">
+          <thead>
+            <tr><th>Patient</th><th>Goal</th><th>Status</th><th>Assigned</th><th>Age of case</th><th>Ref</th></tr>
+          </thead>
+          <tbody id="caseRows">
+            <tr><td colspan="6" class="ppg-loading">Loading…</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div id="caseEmpty"></div>
+    </section>
+  </main>
+</div>
+
+<script src="portal.js"></script>
+<script>
+(function () {
+  'use strict';
+  var esc = Portal.esc;
+  var doctors = [];          // last-loaded care team
+  var openCounts = null;     // fallback open-case counts computed from an unfiltered case load
+
+  Portal.guard(['admin']).then(function () {
+    document.getElementById('todayLine').textContent = new Date().toLocaleDateString('en-US',
+      { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+    buildGoalControls();
+    loadStats();
+    loadCases(true);
+    loadDoctors();
+    loadProtocol();
+  }).catch(function () { /* guard redirects */ });
+
+  /* ---------- prescribing protocol ---------- */
+  var ladder = [];
+  function ladderRow(step, i) {
+    return '<div class="ladder-row" data-i="' + i + '">' +
+      '<input class="input" data-f="label" value="' + esc(step.label || '') + '" placeholder="Dose, e.g. step ' + (i + 1) + '" aria-label="Dose for step ' + (i + 1) + '">' +
+      '<input class="input" data-f="instructions" value="' + esc(step.instructions || '') + '" placeholder="Instructions (optional)" aria-label="Instructions for step ' + (i + 1) + '">' +
+      '<button type="button" data-rm="' + i + '" aria-label="Remove step ' + (i + 1) + '">Remove</button>' +
+      '</div>';
+  }
+  function renderLadder() {
+    var wrap = document.getElementById('ladderRows');
+    wrap.innerHTML = ladder.length
+      ? ladder.map(ladderRow).join('')
+      : '<p class="small" style="margin:0 0 10px">No dose steps yet — the system will not draft prescriptions until you add at least one.</p>';
+    wrap.querySelectorAll('input').forEach(function (inp) {
+      inp.addEventListener('input', function () {
+        var i = Number(inp.closest('.ladder-row').getAttribute('data-i'));
+        ladder[i][inp.getAttribute('data-f')] = inp.value;
+      });
+    });
+    wrap.querySelectorAll('[data-rm]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        ladder.splice(Number(b.getAttribute('data-rm')), 1);
+        renderLadder();
+      });
+    });
+  }
+  function loadProtocol() {
+    Portal.api('/api/protocol').then(function (d) {
+      var p = d.protocol || {};
+      ladder = (p.doseLadder || []).map(function (s) { return { label: s.label, instructions: s.instructions }; });
+      document.getElementById('pDrug').value = p.drug || '';
+      document.getElementById('pInterval').value = p.reviewIntervalDays || 30;
+      document.getElementById('pSide').value = (p.minorSideEffects || []).join('\n');
+      document.getElementById('pUrgent').value = p.urgentAdvice || '';
+      document.getElementById('pReview').value = p.reviewInstruction || '';
+      renderLadder();
+      document.getElementById('protoLoading').hidden = true;
+      document.getElementById('protoForm').hidden = false;
+      document.getElementById('protoMeta').textContent = d.configured
+        ? 'Active' + (p.updatedBy ? ' · last updated by ' + p.updatedBy : '')
+        : 'Not configured yet — eligible consultations will wait for a doctor instead of being drafted.';
+    }).catch(function (e) {
+      document.getElementById('protoLoading').textContent = e.message;
+    });
+  }
+  document.getElementById('btnAddStep').addEventListener('click', function () {
+    ladder.push({ label: '', instructions: '' });
+    renderLadder();
+  });
+  document.getElementById('btnSaveProto').addEventListener('click', function () {
+    var body = {
+      drug: document.getElementById('pDrug').value.trim(),
+      doseLadder: ladder.filter(function (s) { return (s.label || '').trim(); }),
+      reviewIntervalDays: Number(document.getElementById('pInterval').value) || 30,
+      minorSideEffects: document.getElementById('pSide').value.split('\n').map(function (x) { return x.trim(); }).filter(Boolean),
+      urgentAdvice: document.getElementById('pUrgent').value.trim(),
+      reviewInstruction: document.getElementById('pReview').value.trim()
+    };
+    Portal.api('/api/protocol', { method: 'PUT', body: body })
+      .then(function () { Portal.toast('Protocol saved'); loadProtocol(); })
+      .catch(function (e) { Portal.toast(e.message, true); });
+  });
+
+  /* ---------- goal-driven controls (checkboxes + filter) ---------- */
+  function buildGoalControls() {
+    var checks = '', opts = '<option value="">All goals</option>';
+    Object.keys(Portal.GOALS).forEach(function (k) {
+      checks += '<label><input type="checkbox" value="' + esc(k) + '"> ' + esc(Portal.GOALS[k]) + '</label>';
+      opts += '<option value="' + esc(k) + '">' + esc(Portal.GOALS[k]) + '</option>';
+    });
+    document.getElementById('dGoals').innerHTML = checks;
+    document.getElementById('fGoal').innerHTML = opts;
+  }
+
+  /* =============================================================
+     Section 1 — Today
+     ============================================================= */
+  function loadStats() {
+    Portal.api('/api/stats').then(function (s) {
+      s = s || {};
+      var waiting = firstNum(s.waiting, s.waitingCount, s.newCases,
+        s.byStatus && s.byStatus.new, s.statusCounts && s.statusCounts.new);
+      var newToday = firstNum(s.newToday, s.todayNew, s.createdToday);
+      var avg = firstNum(s.avgHoursToPlan, s.avgTimeToPlanHours, s.avgHoursToPlanSent);
+      var within = firstNum(s.within24hPct, s.within24Pct, s.pctWithin24h, s.within24);
+
+      var tiles = document.getElementById('statTiles');
+      tiles.innerHTML =
+        tile(waiting == null ? 0 : waiting, 'Waiting (new)', waiting != null && waiting > 5) +
+        tile(newToday == null ? 0 : newToday, 'New today', false) +
+        tile(avg == null ? '—' : (Math.round(avg * 10) / 10) + 'h', 'Avg hours to plan', false) +
+        tile(within == null ? '—' : Math.round(within) + '%', 'Within 24h', false);
+
+      var byGoal = normalizeByGoal(s.byGoal || s.goals || s.perGoal);
+      var mini = '';
+      Object.keys(Portal.GOALS).forEach(function (k) {
+        mini += tile(byGoal[k] || 0, esc(Portal.GOALS[k]), false);
+      });
+      document.getElementById('goalTiles').innerHTML = mini;
+    }).catch(function (e) {
+      document.getElementById('statTiles').innerHTML =
+        tile('—', 'Waiting (new)') + tile('—', 'New today') + tile('—', 'Avg hours to plan') + tile('—', 'Within 24h');
+      Portal.toast(e.message || 'Could not load stats.', true);
+    });
+  }
+  function tile(n, label, warn) {
+    return '<div class="pstat' + (warn ? ' warn' : '') + '"><div class="n">' + esc(n) + '</div><div class="l">' + label + '</div></div>';
+  }
+  function firstNum() {
+    for (var i = 0; i < arguments.length; i++) {
+      var v = arguments[i];
+      if (typeof v === 'number' && isFinite(v)) return v;
+    }
+    return null;
+  }
+  function normalizeByGoal(bg) {
+    var out = {};
+    if (Array.isArray(bg)) {
+      bg.forEach(function (g) { if (g && g.goal) out[g.goal] = g.count || g.n || 0; });
+    } else if (bg && typeof bg === 'object') {
+      Object.keys(bg).forEach(function (k) {
+        var v = bg[k];
+        out[k] = (typeof v === 'number') ? v : (v && (v.count || v.total)) || 0;
+      });
+    }
+    return out;
+  }
+
+  /* =============================================================
+     Section 2 — Care team
+     ============================================================= */
+  var addCard = document.getElementById('addCard');
+  document.getElementById('addBtn').addEventListener('click', function () {
+    addCard.hidden = !addCard.hidden;
+    if (!addCard.hidden) document.getElementById('dName').focus();
+  });
+  document.getElementById('cancelAdd').addEventListener('click', function () {
+    addCard.hidden = true;
+    resetAddForm();
+  });
+
+  function resetAddForm() {
+    document.getElementById('dName').value = '';
+    document.getElementById('dEmail').value = '';
+    document.querySelectorAll('#dGoals input').forEach(function (c) { c.checked = false; });
+  }
+
+  document.getElementById('createBtn').addEventListener('click', function () {
+    var name = document.getElementById('dName').value.trim();
+    var email = document.getElementById('dEmail').value.trim().toLowerCase();
+    if (!name) return Portal.toast('Name is required.', true);
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return Portal.toast('A valid email is required.', true);
+    var specialties = [];
+    document.querySelectorAll('#dGoals input:checked').forEach(function (c) { specialties.push(c.value); });
+
+    var btn = document.getElementById('createBtn');
+    btn.disabled = true;
+    Portal.api('/api/doctors', { method: 'POST', body: { name: name, email: email, specialties: specialties } })
+      .then(function (d) {
+        btn.disabled = false;
+        addCard.hidden = true;
+        resetAddForm();
+        var pw = extractTempPassword(d);
+        var docName = (d.doctor && d.doctor.name) || (d.user && d.user.name) || name;
+        if (pw) showPasswordCallout(docName, pw);
+        Portal.toast('Doctor added.');
+        loadDoctors();
+      })
+      .catch(function (e) { btn.disabled = false; Portal.toast(e.message || 'Could not add doctor.', true); });
+  });
+
+  function extractTempPassword(d) {
+    if (!d) return null;
+    return d.tempPassword || d.temporaryPassword || d.password ||
+      (d.doctor && (d.doctor.tempPassword || d.doctor.temporaryPassword)) ||
+      (d.user && (d.user.tempPassword || d.user.temporaryPassword)) || null;
+  }
+
+  function showPasswordCallout(docName, pw) {
+    var slot = document.getElementById('calloutSlot');
+    slot.innerHTML =
+      '<div class="callout ppg-callout">' +
+        '<div><strong>Temp password for ' + esc(docName) + ':</strong> ' +
+        '<code class="ppg-pass" id="ppgPass">' + esc(pw) + '</code> ' +
+        '<button type="button" class="btn-back ppg-act" id="copyPw">Copy</button></div>' +
+        '<p>Share this with the doctor — it is shown only once. They must change it at first sign-in.</p>' +
+      '</div>';
+    document.getElementById('copyPw').addEventListener('click', function () { copyText(pw); });
+    slot.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  function copyText(t) {
+    function fallback() {
+      var ta = document.createElement('textarea');
+      ta.value = t;
+      ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand('copy'); Portal.toast('Copied to clipboard.'); }
+      catch (e) { Portal.toast('Copy failed — select it manually.', true); }
+      ta.remove();
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(t)
+        .then(function () { Portal.toast('Copied to clipboard.'); })
+        .catch(fallback);
+    } else fallback();
+  }
+
+  function loadDoctors() {
+    Portal.api('/api/doctors').then(function (d) {
+      doctors = Array.isArray(d) ? d : (d.doctors || d.users || []);
+      renderDoctors();
+    }).catch(function (e) {
+      document.getElementById('docRows').innerHTML = '';
+      document.getElementById('docEmpty').innerHTML =
+        '<div class="pempty">Could not load the care team. <span class="pen-note">Try a refresh?</span></div>';
+      Portal.toast(e.message || 'Could not load doctors.', true);
+    });
+  }
+
+  function openCountFor(doc) {
+    if (typeof doc.openLoad === 'number') return doc.openLoad;
+    if (typeof doc.openCases === 'number') return doc.openCases;
+    if (typeof doc.open === 'number') return doc.open;
+    if (openCounts) return openCounts[doc.id] || 0;
+    return '—';
+  }
+
+  function renderDoctors() {
+    var body = document.getElementById('docRows');
+    var empty = document.getElementById('docEmpty');
+    if (!doctors.length) {
+      body.innerHTML = '';
+      empty.innerHTML = '<div class="pempty">No doctors yet. <span class="pen-note">Add your first one above.</span></div>';
+      return;
+    }
+    empty.innerHTML = '';
+    body.innerHTML = doctors.map(function (d) {
+      var specs = (d.specialties || []).map(function (k) { return esc(Portal.GOALS[k] || k); }).join(', ') || '—';
+      var active = d.active !== false;
+      return '<tr class="' + (active ? '' : 'ppg-inactive') + '">' +
+        '<td><b>' + esc(d.name) + '</b></td>' +
+        '<td>' + esc(d.email) + '</td>' +
+        '<td>' + specs + '</td>' +
+        '<td>' + esc(openCountFor(d)) + '</td>' +
+        '<td>' + (active ? 'Active' : 'Inactive') + '</td>' +
+        '<td>' +
+          '<button type="button" class="btn-back ppg-act" data-act="toggle" data-id="' + esc(d.id) + '">' + (active ? 'Deactivate' : 'Activate') + '</button> ' +
+          '<button type="button" class="btn-back ppg-act" data-act="reset" data-id="' + esc(d.id) + '">Reset password</button>' +
+        '</td></tr>';
+    }).join('');
+  }
+
+  document.getElementById('docRows').addEventListener('click', function (ev) {
+    var btn = ev.target.closest('button[data-act]');
+    if (!btn) return;
+    var doc = doctors.find(function (d) { return d.id === btn.getAttribute('data-id'); });
+    if (!doc) return;
+    var active = doc.active !== false;
+
+    if (btn.getAttribute('data-act') === 'toggle') {
+      if (active && !confirm('Deactivate ' + doc.name + '? They will no longer be able to sign in.')) return;
+      btn.disabled = true;
+      Portal.api('/api/doctors/' + encodeURIComponent(doc.id), {
+        method: 'PATCH',
+        body: { active: !active },
+      }).then(function () {
+        Portal.toast(doc.name + (active ? ' deactivated.' : ' activated.'));
+        loadDoctors();
+      }).catch(function (e) { btn.disabled = false; Portal.toast(e.message || 'Update failed.', true); });
+    }
+
+    if (btn.getAttribute('data-act') === 'reset') {
+      if (!confirm('Reset the password for ' + doc.name + '? Their current password stops working immediately.')) return;
+      btn.disabled = true;
+      Portal.api('/api/doctors/' + encodeURIComponent(doc.id), {
+        method: 'PATCH',
+        body: { resetPassword: true },
+      }).then(function (d) {
+        btn.disabled = false;
+        var pw = extractTempPassword(d);
+        if (pw) showPasswordCallout(doc.name, pw);
+        else Portal.toast('Password reset.');
+      }).catch(function (e) { btn.disabled = false; Portal.toast(e.message || 'Reset failed.', true); });
+    }
+  });
+
+  /* =============================================================
+     Section 3 — All cases
+     ============================================================= */
+  document.getElementById('fStatus').addEventListener('change', function () { loadCases(false); });
+  document.getElementById('fGoal').addEventListener('change', function () { loadCases(false); });
+
+  function loadCases(isInitial) {
+    var status = document.getElementById('fStatus').value;
+    var goal = document.getElementById('fGoal').value;
+    var q = '/api/cases?limit=200';
+    if (status) q += '&status=' + encodeURIComponent(status);
+    if (goal) q += '&goal=' + encodeURIComponent(goal);
+
+    document.getElementById('caseRows').innerHTML =
+      '<tr><td colspan="6" class="ppg-loading">Loading…</td></tr>';
+    document.getElementById('caseEmpty').innerHTML = '';
+
+    Portal.api(q).then(function (d) {
+      var cases = Array.isArray(d) ? d : (d.cases || []);
+      if (isInitial && !status && !goal) {
+        // fallback open-case load per doctor (used only when the API doesn't send counts)
+        openCounts = {};
+        cases.forEach(function (c) {
+          /* matches the server's openLoad definition: in_review + awaiting_patient */
+          if (c.assignedTo && (c.status === 'in_review' || c.status === 'awaiting_patient')) {
+            openCounts[c.assignedTo] = (openCounts[c.assignedTo] || 0) + 1;
+          }
+        });
+        if (doctors.length) renderDoctors();
+      }
+      renderCases(cases);
+    }).catch(function (e) {
+      document.getElementById('caseRows').innerHTML = '';
+      document.getElementById('caseEmpty').innerHTML =
+        '<div class="pempty">Could not load cases. <span class="pen-note">Try a refresh?</span></div>';
+      Portal.toast(e.message || 'Could not load cases.', true);
+    });
+  }
+
+  function renderCases(cases) {
+    var body = document.getElementById('caseRows');
+    var empty = document.getElementById('caseEmpty');
+    if (!cases.length) {
+      body.innerHTML = '';
+      empty.innerHTML = '<div class="pempty">No cases match these filters. <span class="pen-note">All quiet on the ward.</span></div>';
+      return;
+    }
+    empty.innerHTML = '';
+    body.innerHTML = cases.map(function (c) {
+      var intake = c.intake || {};
+      var name = c.name || c.patientName || intake.name || 'Unknown';
+      var goal = c.goal || intake.goal || '';
+      var assigned = c.assignedName || (c.assignedTo ? 'Assigned' : '—');
+      var created = c.createdAt || '';
+      var sla = created ? Portal.slaClass(created, c.status) : '';
+      var age = created
+        ? (sla ? '<span class="sla ' + sla + '">' + esc(Portal.ago(created)) + '</span>' : esc(Portal.ago(created)))
+        : '—';
+      return '<tr class="ppg-row" data-id="' + esc(c.id) + '">' +
+        '<td><b>' + esc(name) + '</b>' + (c.priority ? ' <span class="pprio">PRIORITY</span>' : '') + '</td>' +
+        '<td>' + esc(Portal.GOALS[goal] || goal || '—') + '</td>' +
+        '<td>' + Portal.stamp(c.status) + '</td>' +
+        '<td>' + esc(assigned) + '</td>' +
+        '<td>' + age + '</td>' +
+        '<td>' + esc(c.ref || '—') + '</td>' +
+      '</tr>';
+    }).join('');
+  }
+
+  document.getElementById('caseRows').addEventListener('click', function (ev) {
+    var row = ev.target.closest('tr[data-id]');
+    if (row) location.href = 'case.html?id=' + encodeURIComponent(row.getAttribute('data-id'));
+  });
+})();
+</script>
+</body>
+</html>
