@@ -1,0 +1,8 @@
+{
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "redirects": [
+    { "source": "/lib", "destination": "/", "permanent": false },
+    { "source": "/lib/:path*", "destination": "/", "permanent": false }
+  ]
+}
