@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Suga.health &mdash; Modern doctor-led telehealth</title>
+<meta name="description" content="Doctor-led telehealth for weight loss, hair growth, and sexual health. One private five-minute consultation, reviewed by a licensed physician — typically within 24 hours.">
+<meta name="theme-color" content="#FFFFFF">
+<link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
+<link rel="apple-touch-icon" href="../assets/touch-icon.png">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Suga.health">
+<meta property="og:title" content="Suga.health — Modern doctor-led telehealth">
+<meta property="og:description" content="Doctor-led telehealth for weight loss, hair growth, and sexual health. One private five-minute consultation, reviewed by a licensed physician.">
+<meta property="og:url" content="https://suga-health-lilac.vercel.app/v2">
+<meta property="og:image" content="https://suga-health-lilac.vercel.app/assets/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://suga-health-lilac.vercel.app/assets/og-image.png">
+<link rel="stylesheet" href="assets/v2.css">
+<script src="assets/v2.js" defer></script>
+<style>
+  /* ---- page-specific (v2pg-) ---- */
+  #weight-loss, #hair-growth, #sexual-health, #how-it-works, #faq { scroll-margin-top: 96px; }
+  .v2pg-hero { position: relative; overflow: hidden; padding: clamp(84px, 11vw, 132px) 0 clamp(64px, 8vw, 96px); }
+  .v2pg-blob { position: absolute; width: 560px; height: 560px; border-radius: 50%; pointer-events: none; }
+  .v2pg-blob--sage  { top: -180px; left: -160px; background: radial-gradient(circle, var(--sage) 0%, transparent 68%); }
+  .v2pg-blob--blush { top: -140px; right: -180px; background: radial-gradient(circle, var(--blush) 0%, transparent 68%); }
+  .v2pg-blob--blue  { bottom: -320px; left: 50%; transform: translateX(-50%); background: radial-gradient(circle, var(--blue) 0%, transparent 68%); }
+  .v2pg-hero-inner { position: relative; }
+  .v2pg-hero .h1 { max-width: 14ch; margin: 0 auto 24px; }
+  .v2pg-hero .sub { max-width: 56ch; }
+  .v2pg-cta-col { display: flex; flex-direction: column; align-items: center; gap: 14px; margin-top: 38px; }
+  .v2pg-cats { display: flex; justify-content: center; gap: 16px; flex-wrap: wrap; margin-top: 52px; }
+  .v2pg-mq { display: flex; align-items: center; gap: 56px; padding-right: 56px; flex: 0 0 auto; }
+  .v2pg-marquee .marquee-track { gap: 0; }
+  .v2pg-panels { padding: clamp(64px, 8vw, 96px) 0 40px; }
+  .v2pg-panel { padding: clamp(36px, 6.5vw, 92px); margin-bottom: 20px; }
+  .v2pg-panel h2 { font-size: clamp(1.95rem, 3.6vw, 2.85rem); max-width: 17ch; }
+  .v2pg-panel .sub { margin-bottom: 30px; }
+  .v2pg-note { margin: 0 clamp(8px, 3vw, 48px) 56px; max-width: 74ch; }
+  .v2pg-fc-sage  { bottom: 8px;  right: 4px; }
+  .v2pg-fc-blush { bottom: 20px; left: 0; }
+  .v2pg-fc-blue  { top: 22px;    right: 0; }
+  .v2pg-sample { max-width: 62ch; margin: -6px auto 48px; }
+  .v2pg-quiet .t-card { box-shadow: none; }
+  .v2pg-guarantee { padding: 48px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+  .v2pg-steps-head { margin-bottom: 48px; }
+  .v2pg-cards-head { margin-bottom: 48px; }
+  @media (max-width: 640px) {
+    .v2pg-blob { width: 380px; height: 380px; }
+    .v2pg-cats { gap: 10px; margin-top: 40px; }
+    .float-card { font-size: .8rem; padding: 11px 14px; }
+  }
+</style>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <symbol id="v2-ck" viewBox="0 0 24 24"><polyline points="20 6.5 9.5 17 4 11.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="v2-star" viewBox="0 0 24 24"><path d="M12 2.8l2.85 5.78 6.38.93-4.62 4.5 1.09 6.36L12 17.37l-5.7 3-1.09-6.36-4.62-4.5 6.38-.93z"/></symbol>
+</svg>
+
+<!-- 1. Announcement strip -->
+<p class="announce" role="note">Every consultation is reviewed by a licensed physician &mdash; typically within 24 hours.</p>
+
+<!-- 2. Nav -->
+<header class="nav">
+  <div class="nav-inner">
+    <a class="brand" href="#main" aria-label="Suga.health home">
+      <span class="brand-word">Suga.health</span>
+      <span class="brand-tag">live naturally</span>
+    </a>
+    <nav aria-label="Main">
+      <ul class="nav-links" id="navLinks">
+        <li><a href="#weight-loss">Weight Loss</a></li>
+        <li><a href="#hair-growth">Hair Growth</a></li>
+        <li><a href="#sexual-health">Sexual Health</a></li>
+        <li><a href="#how-it-works">How it works</a></li>
+      </ul>
+    </nav>
+    <div style="display:flex;align-items:center;gap:12px">
+      <a class="pill-btn nav-cta-desktop" href="../consultation.html">Start consultation</a>
+      <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="navLinks" aria-label="Menu">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<main id="main">
+
+  <!-- 3. Hero -->
+  <section class="v2pg-hero">
+    <div class="v2pg-blob v2pg-blob--sage" aria-hidden="true"></div>
+    <div class="v2pg-blob v2pg-blob--blush" aria-hidden="true"></div>
+    <div class="v2pg-blob v2pg-blob--blue" aria-hidden="true"></div>
+    <div class="container center v2pg-hero-inner reveal">
+      <p class="eyebrow">Doctor-led telehealth &mdash; 100% online</p>
+      <h1 class="h1">Feel like yourself again.</h1>
+      <p class="sub">Weight loss. Hair growth. Sexual health. Three different journeys &mdash; one honest starting point: a private five-minute consultation, reviewed by a real doctor.</p>
+      <div class="v2pg-cta-col">
+        <a class="pill-btn pill-btn--lg" href="../consultation.html">Start consultation</a>
+        <p class="small" style="margin:0">Free to start &middot; 5 minutes &middot; Confidential</p>
+      </div>
+      <div class="v2pg-cats">
+        <a class="cat-pill" href="#weight-loss">
+          <svg viewBox="0 0 24 24" fill="none" stroke="var(--sage-ink)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="4"/><path d="M8.5 9.5a4.6 4.6 0 0 1 7 0"/><path d="M12 10.5l2-2.4"/></svg>
+          Weight loss
+        </a>
+        <a class="cat-pill" href="#hair-growth">
+          <svg viewBox="0 0 24 24" fill="none" stroke="var(--blush-ink)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21V9"/><path d="M12 13c-3.4-.4-5.6-2.6-6-6 3.4.4 5.6 2.6 6 6z"/><path d="M12 9c.4-2.8 2.2-4.6 5-5-.4 2.8-2.2 4.6-5 5z"/></svg>
+          Hair growth
+        </a>
+        <a class="cat-pill" href="#sexual-health">
+          <svg viewBox="0 0 24 24" fill="none" stroke="var(--blue-ink)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l7 2.6v5.1c0 4.4-2.8 7.2-7 9.3-4.2-2.1-7-4.9-7-9.3V5.6z"/><path d="M12 14.6s-3.2-2.1-3.2-4.2c0-1.2.9-2 2-2 .5 0 1 .3 1.2.8.2-.5.7-.8 1.2-.8 1.1 0 2 .8 2 2 0 2.1-3.2 4.2-3.2 4.2z"/></svg>
+          Sexual health
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. Trust marquee -->
+  <div class="marquee v2pg-marquee" aria-label="Why patients trust Suga.health">
+    <div class="marquee-track">
+      <div class="v2pg-mq">
+        <span>Licensed physicians</span>
+        <span>100% online</span>
+        <span>Clear pricing before treatment</span>
+        <span>Discreet delivery</span>
+        <span>Follow-up included</span>
+      </div>
+      <div class="v2pg-mq" aria-hidden="true">
+        <span>Licensed physicians</span>
+        <span>100% online</span>
+        <span>Clear pricing before treatment</span>
+        <span>Discreet delivery</span>
+        <span>Follow-up included</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5–7. Vertical panels -->
+  <section class="v2pg-panels" aria-label="What we treat">
+    <div class="container">
+
+      <!-- 5. Weight loss (sage) -->
+      <article class="panel panel--sage v2pg-panel reveal" id="weight-loss">
+        <div>
+          <p class="eyebrow">Doctor-guided weight loss</p>
+          <h2>Weight loss made honest, built around you</h2>
+          <p class="sub">No one-size plans and no auto-prescriptions &mdash; a physician reads your history first, then builds treatment around it.</p>
+          <ul class="check-list">
+            <li><span class="ck"><svg aria-hidden="true"><use href="#v2-ck"/></svg></span>GLP-1 medication when appropriate</li>
+            <li><span class="ck"><svg aria-hidden="true"><use href="#v2-ck"/></svg></span>1:1 physician guidance</li>
+            <li><span class="ck"><svg aria-hidden="true"><use href="#v2-ck"/></svg></span>Typically 10&ndash;15% of body weight in 6&ndash;12 months*</li>
+            <li><span class="ck"><svg aria-hidden="true"><use href="#v2-ck"/></svg></span>Follow-ups included</li>
+            <li><span class="ck"><svg aria-hidden="true"><use href="#v2-ck"/></svg></span>Clear pricing before you start</li>
+          </ul>
+          <a class="pill-btn" href="../consultation.html?goal=weight-loss">Start consultation</a>
+        </div>
+        <div class="p-visual">
+          <svg viewBox="0 0 340 280" role="img" aria-label="Illustration: a progress chart trending gently downward above a bathroom scale">
+            <rect x="30" y="24" width="280" height="164" rx="22" fill="#FFFFFF"/>
+            <path d="M60 96h40M60 112h26" stroke="#DFEBD3" stroke-width="7" stroke-linecap="round"/>
+            <path d="M60 66c50 12 78 46 116 66 38 20 74 28 104 32" fill="none" stroke="#45663A" stroke-width="2.5" stroke-linecap="round"/>
+            <circle cx="60" cy="66" r="5" fill="#DFEBD3" stroke="#45663A" stroke-width="2"/>
+            <circle cx="176" cy="132" r="5" fill="#DFEBD3" stroke="#45663A" stroke-width="2"/>
+            <circle cx="280" cy="164" r="6" fill="#45663A"/>
+            <rect x="106" y="210" width="128" height="52" rx="17" fill="#DFEBD3"/>
+            <rect x="142" y="222" width="56" height="18" rx="9" fill="#FFFFFF"/>
+            <path d="M170 240l11-9" stroke="#45663A" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          <div class="float-card bob v2pg-fc-sage">
+            <span class="dot" aria-hidden="true"></span>
+            <span>Typical: &minus;12 kg by month 9*<small>individual results vary</small></span>
+          </div>
+        </div>
+      </article>
+      <p class="small v2pg-note">*Ranges reflect outcomes reported in published clinical studies of medically supervised weight-loss treatment; individual results vary. Your doctor will discuss what is realistic for you before anything is prescribed.</p>
+
+      <!-- 6. Hair growth (blush, reversed) -->
+      <article class="panel panel--blush panel--rev v2pg-panel reveal" id="hair-growth">
+        <div>
+          <p class="eyebrow">Proven hair regrowth care</p>
+          <h2>Keep the hair you have. Regrow what you can.</h2>
+          <p class="sub">Earlier is easier. We use medications with decades of evidence &mdash; no miracle serums, no guesswork.</p>
+          <ul class="check-list">
+            <li><span class="ck"><svg aria-hidden="true"><use href="#v2-ck"/></svg></span>First-line medication chosen by a doctor</li>
+            <li><span class="ck"><svg aria-hidden="true"><use href="#v2-ck"/></svg></span>~9 in 10 men stop further loss*</li>
+            <li><span class="ck"><svg aria-hidden="true"><use href="#v2-ck"/></svg></span>Root causes checked: thyroid, iron, hormones</li>
+            <li><span class="ck"><svg aria-hidden="true"><use href="#v2-ck"/></svg></span>A 12-month plan, not a 12-day promise</li>
+          </ul>
+          <a class="pill-btn" href="../consultation.html?goal=hair-growth">Start consultation</a>
+        </div>
+        <div class="p-visual">
+          <svg viewBox="0 0 340 280" role="img" aria-label="Illustration: a young sprout growing new leaves">
+            <circle cx="170" cy="146" r="110" fill="#FFFFFF"/>
+            <path d="M170 216c-3-40-2-76 1-104" fill="none" stroke="#8A5A44" stroke-width="2.5" stroke-linecap="round"/>
+            <path d="M169 152c-21-3-35-17-38-38 21 3 35 17 38 38z" fill="#F1DCD3" stroke="#8A5A44" stroke-width="2" stroke-linejoin="round"/>
+            <path d="M171 118c2-19 14-31 33-34-2 19-14 31-33 34z" fill="#F1DCD3" stroke="#8A5A44" stroke-width="2" stroke-linejoin="round"/>
+            <path d="M120 218h100" stroke="#8A5A44" stroke-width="2.5" stroke-linecap="round"/>
+            <circle cx="112" cy="94" r="3" fill="#8A5A44"/>
+            <circle cx="232" cy="70" r="3" fill="#8A5A44"/>
+            <circle cx="244" cy="176" r="3" fill="#8A5A44"/>
+          </svg>
+          <div class="float-card bob-late v2pg-fc-blush">
+            <span class="dot" aria-hidden="true"></span>
+            <span>Month 3<small>shedding stabilises for most men</small></span>
+          </div>
+        </div>
+      </article>
+      <p class="small v2pg-note">*Based on long-term published studies of first-line hair-loss medication in men; individual results vary and take consistent months of treatment.</p>
+
+      <!-- 7. Sexual health (blue) -->
+      <article class="panel panel--blue v2pg-panel reveal" id="sexual-health">
+        <div>
+          <p class="eyebrow">Private sexual health care</p>
+          <h2>Effective care, zero waiting-room small talk</h2>
+          <p class="sub">Common, usually treatable, and nobody's business but yours. Write it once, privately &mdash; a doctor takes it from there.</p>
+          <ul class="check-list">
+            <li><span class="ck"><svg aria-hidden="true"><use href="#v2-ck"/></svg></span>ED &amp; PE treated with proven options</li>
+            <li><span class="ck"><svg aria-hidden="true"><use href="#v2-ck"/></svg></span>Whole-history screening &mdash; ED can be an early heart signal</li>
+            <li><span class="ck"><svg aria-hidden="true"><use href="#v2-ck"/></svg></span>Plain, unmarked delivery</li>
+            <li><span class="ck"><svg aria-hidden="true"><use href="#v2-ck"/></svg></span>Nobody ever has to know</li>
+          </ul>
+          <a class="pill-btn" href="../consultation.html?goal=sexual-health">Start consultation</a>
+        </div>
+        <div class="p-visual">
+          <svg viewBox="0 0 340 280" role="img" aria-label="Illustration: a shield with a heart inside, for private care">
+            <path d="M170 30l88 30v76c0 56-36 92-88 114-52-22-88-58-88-114V60z" fill="#FFFFFF" stroke="#3D5A74" stroke-width="2.5" stroke-linejoin="round"/>
+            <path d="M170 182s-44-29-44-58c0-16 12-27 26-27 8 0 15 4 18 11 3-7 10-11 18-11 14 0 26 11 26 27 0 29-44 58-44 58z" fill="#D8E4EE" stroke="#3D5A74" stroke-width="2.5" stroke-linejoin="round"/>
+            <path d="M148 124h14l6-12 8 20 5-8h11" fill="none" stroke="#3D5A74" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <div class="float-card bob v2pg-fc-blue">
+            <span class="dot" aria-hidden="true"></span>
+            <span>Privacy: by design<small>encrypted records, unmarked packaging</small></span>
+          </div>
+        </div>
+      </article>
+
+    </div>
+  </section>
+
+  <!-- 8. Everything in one place -->
+  <section class="section section--soft">
+    <div class="container">
+      <div class="center reveal v2pg-cards-head">
+        <p class="eyebrow">Your care, organised</p>
+        <h2 class="h2">Everything in one place.</h2>
+        <p class="sub">One private account holds your plan, your progress, and a direct line to your doctor.</p>
+      </div>
+      <div class="grid-3">
+        <article class="card reveal">
+          <div class="icon-chip icon-chip--sage">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19V5"/><path d="M4 19h16"/><path d="M7 14l4-4 3 3 5-6"/></svg>
+          </div>
+          <h3>Track your progress</h3>
+          <p>Weight, doses, and symptoms logged in one private place &mdash; so you and your doctor always see the same picture.</p>
+        </article>
+        <article class="card reveal reveal-d1">
+          <div class="icon-chip icon-chip--blush">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a8 8 0 0 1-8 8H4l2.5-3A8 8 0 1 1 21 12z"/><path d="M9 11h6"/></svg>
+          </div>
+          <h3>Message your doctor anytime</h3>
+          <p>Questions between check-ins don't wait for an appointment. Write when it suits you &mdash; a person replies, not a bot.</p>
+        </article>
+        <article class="card reveal reveal-d2">
+          <div class="icon-chip icon-chip--blue">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.34-5.66"/><path d="M20 4v4h-4"/></svg>
+          </div>
+          <h3>Plans that adapt</h3>
+          <p>Bodies respond differently. Doses and plans are adjusted as yours responds &mdash; follow-ups are part of the plan, not an upsell.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- 9. How it works -->
+  <section class="section" id="how-it-works">
+    <div class="container">
+      <div class="center reveal v2pg-steps-head">
+        <p class="eyebrow">How it works</p>
+        <h2 class="h2">From your story to your plan.</h2>
+        <p class="sub">Same four steps, every goal.</p>
+      </div>
+      <div class="grid-4">
+        <article class="card reveal">
+          <span class="step-num" aria-hidden="true">1</span>
+          <h3>Share your story</h3>
+          <p>The five-minute consultation: your history, current medications, and what you actually want to change.</p>
+        </article>
+        <article class="card reveal reveal-d1">
+          <span class="step-num" aria-hidden="true">2</span>
+          <h3>A doctor reads it</h3>
+          <p>A licensed physician reviews every chart personally, typically within 24 hours. No algorithms deciding your care.</p>
+        </article>
+        <article class="card reveal reveal-d2">
+          <span class="step-num" aria-hidden="true">3</span>
+          <h3>Your plan arrives</h3>
+          <p>Treatment is prescribed only when it is appropriate for you, with clear pricing before you commit to anything.</p>
+        </article>
+        <article class="card reveal reveal-d2">
+          <span class="step-num" aria-hidden="true">4</span>
+          <h3>We stay with you</h3>
+          <p>Follow-ups, dose adjustments, and questions are part of the plan &mdash; not an extra charge.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- 10. Testimonials -->
+  <section class="section section--soft" aria-label="Patient stories">
+    <div class="container">
+      <div class="center reveal">
+        <p class="eyebrow">Patient stories</p>
+        <h2 class="h2">Cared for, not processed.</h2>
+        <p class="small v2pg-sample">Sample testimonials shown for design preview &mdash; to be replaced with real patient feedback.</p>
+      </div>
+      <div class="t-grid v2pg-quiet">
+        <article class="t-card reveal">
+          <div class="t-stars" role="img" aria-label="Rated 5 out of 5 stars">
+            <svg aria-hidden="true"><use href="#v2-star"/></svg><svg aria-hidden="true"><use href="#v2-star"/></svg><svg aria-hidden="true"><use href="#v2-star"/></svg><svg aria-hidden="true"><use href="#v2-star"/></svg><svg aria-hidden="true"><use href="#v2-star"/></svg>
+          </div>
+          <blockquote>&ldquo;I put off asking for help for years. The consultation took five minutes on my phone, and the plan actually fit my life. Nine months in, I'm further than I ever got alone.&rdquo;</blockquote>
+          <cite>&mdash; Rachel</cite>
+        </article>
+        <article class="t-card reveal">
+          <div class="t-stars" role="img" aria-label="Rated 5 out of 5 stars">
+            <svg aria-hidden="true"><use href="#v2-star"/></svg><svg aria-hidden="true"><use href="#v2-star"/></svg><svg aria-hidden="true"><use href="#v2-star"/></svg><svg aria-hidden="true"><use href="#v2-star"/></svg><svg aria-hidden="true"><use href="#v2-star"/></svg>
+          </div>
+          <blockquote>&ldquo;No miracle promises &mdash; just a straight explanation of what the medication could and couldn't do. Six months later my barber noticed before I said anything.&rdquo;</blockquote>
+          <cite>&mdash; Marcus</cite>
+        </article>
+        <article class="t-card reveal">
+          <div class="t-stars" role="img" aria-label="Rated 5 out of 5 stars">
+            <svg aria-hidden="true"><use href="#v2-star"/></svg><svg aria-hidden="true"><use href="#v2-star"/></svg><svg aria-hidden="true"><use href="#v2-star"/></svg><svg aria-hidden="true"><use href="#v2-star"/></svg><svg aria-hidden="true"><use href="#v2-star"/></svg>
+          </div>
+          <blockquote>&ldquo;The part I dreaded &mdash; talking about it &mdash; never happened the awkward way. I wrote it once, privately, and a doctor handled the rest. The package told nobody anything.&rdquo;</blockquote>
+          <cite>&mdash; Daniel</cite>
+        </article>
+        <article class="t-card reveal reveal-d1">
+          <div class="t-stars" role="img" aria-label="Rated 5 out of 5 stars">
+            <svg aria-hidden="true"><use href="#v2-star"/></svg><svg aria-hidden="true"><use href="#v2-star"/></svg><svg aria-hidden="true"><use href="#v2-star"/></svg><svg aria-hidden="true"><use href="#v2-star"/></svg><svg aria-hidden="true"><use href="#v2-star"/></svg>
+          </div>
+          <blockquote>&ldquo;What won me over was being told &lsquo;not yet&rsquo; &mdash; the doctor wouldn't prescribe until my thyroid results came back. That's when I knew this was real medicine.&rdquo;</blockquote>
+          <cite>&mdash; Priya</cite>
+        </article>
+        <article class="t-card reveal reveal-d1">
+          <div class="t-stars" role="img" aria-label="Rated 5 out of 5 stars">
+            <svg aria-hidden="true"><use href="#v2-star"/></svg><svg aria-hidden="true"><use href="#v2-star"/></svg><svg aria-hidden="true"><use href="#v2-star"/></svg><svg aria-hidden="true"><use href="#v2-star"/></svg><svg aria-hidden="true"><use href="#v2-star"/></svg>
+          </div>
+          <blockquote>&ldquo;The follow-ups are the difference. When the first dose wasn't right for me, adjusting it was a message, not another appointment.&rdquo;</blockquote>
+          <cite>&mdash; Aisha</cite>
+        </article>
+        <article class="t-card reveal reveal-d2">
+          <div class="t-stars" role="img" aria-label="Rated 5 out of 5 stars">
+            <svg aria-hidden="true"><use href="#v2-star"/></svg><svg aria-hidden="true"><use href="#v2-star"/></svg><svg aria-hidden="true"><use href="#v2-star"/></svg><svg aria-hidden="true"><use href="#v2-star"/></svg><svg aria-hidden="true"><use href="#v2-star"/></svg>
+          </div>
+          <blockquote>&ldquo;Honest from the first screen: keep what you have first, regrow what you can second. Month four, and the shedding has stopped.&rdquo;</blockquote>
+          <cite>&mdash; Tom</cite>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- 11. Guarantee strip -->
+  <section class="v2pg-guarantee" aria-label="Our standard">
+    <div class="container">
+      <div class="guarantee reveal">
+        <div>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 3v6a5 5 0 0 0 10 0V3"/><path d="M10 14v3a4 4 0 0 0 8 0v-2"/><circle cx="18" cy="12" r="2.4"/></svg>
+          Doctor-led plans
+        </div>
+        <div>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12.6 3H5a2 2 0 0 0-2 2v7.6a2 2 0 0 0 .6 1.4l7.4 7.4a2 2 0 0 0 2.8 0l6.6-6.6a2 2 0 0 0 0-2.8L13.9 3.6a2 2 0 0 0-1.3-.6z"/><circle cx="8.5" cy="8.5" r="1.6"/></svg>
+          No hidden fees
+        </div>
+        <div>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 8l-9-5-9 5v8l9 5 9-5z"/><path d="M3 8l9 5 9-5"/><path d="M12 13v8"/></svg>
+          Discreet, tracked delivery
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 12. FAQ -->
+  <section class="section" id="faq">
+    <div class="container">
+      <div class="center reveal" style="margin-bottom:44px">
+        <p class="eyebrow">Common questions</p>
+        <h2 class="h2">Asked before you ask.</h2>
+      </div>
+      <div class="faq reveal">
+        <details>
+          <summary>Is a real doctor involved?</summary>
+          <div class="faq-a"><p>Yes. Every consultation is reviewed by a licensed physician &mdash; a person, not an algorithm. If anything in your chart needs clarifying, the doctor follows up with you directly before deciding on a plan.</p></div>
+        </details>
+        <details>
+          <summary>Do I need to visit a clinic?</summary>
+          <div class="faq-a"><p>No. The consultation, doctor review, and follow-ups all happen online. If your situation ever needs an in-person exam or lab work, we will tell you honestly and point you to the right place.</p></div>
+        </details>
+        <details>
+          <summary>Is my information private?</summary>
+          <div class="faq-a"><p>Yes. Your records are encrypted, seen only by your care team, and never sold or shared for marketing. Any deliveries arrive in plain, unmarked packaging.</p></div>
+        </details>
+        <details>
+          <summary>Will I definitely get medication?</summary>
+          <div class="faq-a"><p>No &mdash; and that is deliberate. A consultation is a medical review, not a checkout. If treatment is not clinically appropriate for you, the doctor will say so and explain what makes sense instead.</p></div>
+        </details>
+        <details>
+          <summary>What does it cost?</summary>
+          <div class="faq-a"><p>The consultation is free. If the doctor recommends treatment, you see clear pricing for your specific plan before you pay anything &mdash; no subscriptions you did not agree to, no surprise charges.</p></div>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <!-- 13. Final CTA -->
+  <section class="section" aria-label="Start your consultation">
+    <div class="container">
+      <div class="cta-panel reveal">
+        <h2 class="h2">Start where every good outcome starts.</h2>
+        <p class="sub">One private consultation. Five minutes. A doctor takes it from there.</p>
+        <a class="pill-btn pill-btn--white pill-btn--lg" href="../consultation.html">Start consultation</a>
+        <p class="small" style="color:#CDE0CD;margin:18px 0 0">Free to start &middot; reviewed within 24 hours &middot; no obligation</p>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- 14. Footer -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <a class="brand" href="#main">
+          <span class="brand-word">Suga.health</span>
+          <span class="brand-tag">live naturally</span>
+        </a>
+        <p style="max-width:36ch;margin-top:16px">Doctor-led care for weight, hair, and sexual health. Every plan starts with one honest consultation.</p>
+      </div>
+      <div>
+        <h4>Care</h4>
+        <ul>
+          <li><a href="#weight-loss">Weight loss</a></li>
+          <li><a href="#hair-growth">Hair growth</a></li>
+          <li><a href="#sexual-health">Sexual health</a></li>
+          <li><a href="../consultation.html">Start consultation</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Site</h4>
+        <ul>
+          <li><a href="#how-it-works">How it works</a></li>
+          <li><a href="#faq">FAQ</a></li>
+          <li><a href="../index.html">View classic design</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-legal">
+      <p style="margin:0">Suga.health provides medical consultations through licensed physicians. Treatment is prescribed only when clinically appropriate &mdash; a consultation does not guarantee a prescription.</p>
+      <p style="margin:0">Not for medical emergencies. If you are experiencing an emergency, call your local emergency number immediately.</p>
+      <p style="margin:0">&copy; 2026 Suga.health &middot; All rights reserved</p>
+    </div>
+  </div>
+</footer>
+</body>
+</html>

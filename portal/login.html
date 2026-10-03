@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<base href="/portal/">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sign in &mdash; Suga.health Care Team</title>
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#FBFAF6">
+<link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
+<link rel="stylesheet" href="../assets/styles.css">
+<link rel="stylesheet" href="portal.css">
+<style>
+  /* ---- page-specific (ppg-) ---- */
+  .ppg-body { padding: 30px 28px 26px; }
+  .ppg-err { color: var(--proof); font-size: .9rem; font-weight: 600; margin: -8px 0 16px; min-height: 0; display: none; }
+  .ppg-err.is-on { display: block; }
+  .ppg-foot { margin-top: 20px; text-align: center; }
+  .ppg-foot a { color: var(--ink-soft); text-decoration: underline dotted var(--ink-faint); text-underline-offset: 3px; }
+  .ppg-foot a:hover { color: var(--ink); }
+  .ppg-note { text-align: center; margin-top: 26px; font-size: 1.15rem; }
+  .ppg-step-intro { color: var(--ink-soft); font-size: .93rem; margin: 0 0 18px; }
+  #stepChange { display: none; }
+</style>
+</head>
+<body>
+
+<main class="plogin">
+  <div>
+    <div class="plogin-card chart-card">
+      <div class="chart-card__head">
+        <span>Suga.health &mdash; Care Team Access</span>
+        <span class="dot"></span>
+      </div>
+      <div class="chart-card__body ppg-body">
+        <a class="brand" href="../index.html" aria-label="Suga.health home">
+          <span class="brand-word">Suga.health</span>
+          <span class="brand-tag">live naturally</span>
+        </a>
+
+        <!-- step 1: sign in -->
+        <form id="stepLogin" novalidate>
+          <div class="field">
+            <label class="label" for="email">Email</label>
+            <input class="input" id="email" name="email" type="email" autocomplete="username" required autofocus>
+          </div>
+          <div class="field">
+            <label class="label" for="password">Password</label>
+            <input class="input" id="password" name="password" type="password" autocomplete="current-password" required>
+          </div>
+          <p class="ppg-err" id="loginErr" role="alert"></p>
+          <button class="btn" id="loginBtn" type="submit" style="width:100%">Sign in</button>
+        </form>
+
+        <!-- step 2: forced password change (temp password) -->
+        <form id="stepChange" novalidate>
+          <p class="ppg-step-intro">Your temporary password must be changed before you continue. Choose a new one.</p>
+          <div class="field">
+            <label class="label" for="newPass">New password</label>
+            <input class="input" id="newPass" type="password" autocomplete="new-password" minlength="10" required>
+          </div>
+          <div class="field">
+            <label class="label" for="confirmPass">Confirm new password</label>
+            <input class="input" id="confirmPass" type="password" autocomplete="new-password" minlength="10" required>
+          </div>
+          <p class="ppg-err" id="changeErr" role="alert"></p>
+          <button class="btn" id="changeBtn" type="submit" style="width:100%">Set password &amp; continue</button>
+        </form>
+
+        <p class="small ppg-foot">
+          Access is provisioned by your administrator.<br>
+          <a href="../index.html">Back to Suga.health</a>
+        </p>
+      </div>
+    </div>
+    <p class="pen-note ppg-note">the doctor will see you now &mdash; after you sign in</p>
+  </div>
+</main>
+
+<script src="portal.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  /* Local API helper: same shape as Portal.api but WITHOUT the 401 redirect —
+     on this page a 401 means "wrong password" / "not signed in yet", never
+     "kick back to login" (which would loop on the clean-URL /portal/login path). */
+  function api(path, opts) {
+    opts = opts || {};
+    return fetch(path, {
+      method: opts.method || 'GET',
+      credentials: 'same-origin',
+      headers: opts.body ? { 'content-type': 'application/json' } : undefined,
+      body: opts.body ? JSON.stringify(opts.body) : undefined,
+    }).then(function (r) {
+      return r.json().catch(function () { return {}; }).then(function (data) {
+        if (!r.ok) throw new Error(data.error || ('Request failed (' + r.status + ')'));
+        return data;
+      });
+    });
+  }
+
+  /* Already signed in? Straight to the worklist. */
+  api('/api/auth/me').then(function () {
+    location.replace('index.html');
+  }).catch(function () { /* not signed in — stay on the login page */ });
+
+  var loginForm = document.getElementById('stepLogin');
+  var changeForm = document.getElementById('stepChange');
+  var loginBtn = document.getElementById('loginBtn');
+  var changeBtn = document.getElementById('changeBtn');
+  var loginErr = document.getElementById('loginErr');
+  var changeErr = document.getElementById('changeErr');
+  var tempPassword = ''; // the temp password just used, needed as "current" for the change
+
+  function showErr(el, msg) { el.textContent = msg; el.classList.add('is-on'); }
+  function hideErr(el) { el.textContent = ''; el.classList.remove('is-on'); }
+
+  loginForm.addEventListener('submit', function (e) {
+    e.preventDefault();
+    hideErr(loginErr);
+    var email = document.getElementById('email').value.trim();
+    var password = document.getElementById('password').value;
+    if (!email || !password) { showErr(loginErr, 'Enter your email and password.'); return; }
+
+    loginBtn.disabled = true;
+    api('/api/auth/login', { method: 'POST', body: { email: email, password: password } })
+      .then(function (d) {
+        if (d.user && d.user.mustChangePassword) {
+          tempPassword = password;
+          loginForm.style.display = 'none';
+          changeForm.style.display = 'block';
+          document.getElementById('newPass').focus();
+          loginBtn.disabled = false;
+        } else {
+          location.replace('index.html');
+        }
+      })
+      .catch(function (err) {
+        showErr(loginErr, err.message || 'Sign-in failed. Try again.');
+        loginBtn.disabled = false;
+      });
+  });
+
+  changeForm.addEventListener('submit', function (e) {
+    e.preventDefault();
+    hideErr(changeErr);
+    var next = document.getElementById('newPass').value;
+    var confirm = document.getElementById('confirmPass').value;
+    if (next.length < 10) { showErr(changeErr, 'New password must be at least 10 characters.'); return; }
+    if (next !== confirm) { showErr(changeErr, 'Passwords do not match.'); return; }
+    if (next === tempPassword) { showErr(changeErr, 'New password must differ from the temporary one.'); return; }
+
+    changeBtn.disabled = true;
+    api('/api/auth/change-password', { method: 'POST', body: { current: tempPassword, next: next } })
+      .then(function () {
+        location.replace('index.html');
+      })
+      .catch(function (err) {
+        showErr(changeErr, err.message || 'Could not change the password. Try again.');
+        changeBtn.disabled = false;
+      });
+  });
+})();
+</script>
+</body>
+</html>
