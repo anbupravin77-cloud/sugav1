@@ -1,0 +1,15 @@
+node_modules
+index-full-backup.html
+DESIGN-SPEC.md
+LOVABLE-PROMPT.md
+PORTAL-PLAN.md
+.env.local
+.env*.local
+.vercel
+.localdata
+server.local.js
+assets/og-image.html
+assets/touch-icon.html
+v2/DESIGN-SPEC-V2.md
+v2/_candidate-a.html
+v2/_candidate-b.html

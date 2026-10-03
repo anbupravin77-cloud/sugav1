@@ -1,0 +1,25 @@
+# ---- secrets: NEVER commit ----
+.env
+.env.*
+!.env.example
+.vercel/
+
+# ---- patient data (encrypted local store) ----
+.localdata/
+
+# ---- dependencies / build ----
+node_modules/
+npm-debug.log*
+package-lock.json
+
+# ---- os / editor noise ----
+Thumbs.db
+Desktop.ini
+.DS_Store
+*.swp
+.idea/
+.vscode/
+
+# ---- internal working files ----
+index-full-backup.html
+v2/_candidate-*.html
