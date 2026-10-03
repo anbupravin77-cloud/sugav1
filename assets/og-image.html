@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<style>
+  @import url('fonts.css');
+  * { margin: 0; box-sizing: border-box; }
+  body {
+    width: 1200px; height: 630px; overflow: hidden;
+    background: #FBFAF6;
+    font-family: 'Public Sans', sans-serif;
+    display: flex; align-items: center; justify-content: center;
+    position: relative;
+  }
+  body::before {
+    content: ''; position: absolute; inset: 24px;
+    border: 1.5px solid #E3DFD2; border-radius: 18px;
+  }
+  body::after {
+    content: ''; position: absolute; inset: 0; opacity: .05; mix-blend-mode: multiply;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  .inner { text-align: center; position: relative; }
+  .word {
+    font-family: 'Archivo', sans-serif; font-weight: 800; font-stretch: 118%;
+    font-size: 132px; letter-spacing: -.02em; color: #191813; line-height: 1;
+    display: inline-block; position: relative;
+  }
+  .word::after {
+    content: ''; position: absolute; left: 1%; bottom: -14px; height: 12px; width: 98%;
+    background-image: radial-gradient(circle, #DF2E2A 38%, transparent 44%);
+    background-size: 24px 12px; background-repeat: repeat-x; background-position: left center;
+  }
+  .tag {
+    font-family: 'Caveat', cursive; font-weight: 600; font-size: 64px; color: #C2410C;
+    margin-top: 42px; transform: rotate(-2deg);
+  }
+  .line {
+    margin-top: 46px; font-size: 26px; font-weight: 600; color: #57544A; letter-spacing: .14em;
+    text-transform: uppercase;
+  }
+  .line b { color: #191813; }
+  .stamp {
+    position: absolute; top: 74px; right: 92px;
+    font-weight: 700; font-size: 20px; letter-spacing: .22em; text-transform: uppercase;
+    color: #2E6B44; border: 3px solid #2E6B44; border-radius: 8px; padding: 10px 22px;
+    transform: rotate(7deg); opacity: .9;
+  }
+</style>
+</head>
+<body>
+  <div class="stamp">Doctor reviewed</div>
+  <div class="inner">
+    <span class="word">Suga.health</span>
+    <div class="tag">live naturally</div>
+    <div class="line">Weight loss &nbsp;·&nbsp; Hair growth &nbsp;·&nbsp; Sexual health</div>
+  </div>
+</body>
+</html>
