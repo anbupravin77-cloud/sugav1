@@ -185,7 +185,8 @@
       '<span class="small">' + esc(c.ref || '') + '</span>' +
       '</div>';
 
-    return '<a class="pcase" href="case.html?id=' + encodeURIComponent(c.id) + '">' +
+    var demoSuffix = new URLSearchParams(location.search).get('demo') === '1' ? '&demo=1' : '';
+    return '<a class="pcase" href="case.html?id=' + encodeURIComponent(c.id) + demoSuffix + '">' +
       '<div>' + who + meta + '</div>' + right + '</a>';
   }
 
@@ -209,6 +210,22 @@
   function load(quiet) {
     var seq = ++fetchSeq;
     if (!quiet) els.list.innerHTML = '<div class="pempty">Loading…</div>';
+    var demo = new URLSearchParams(location.search).get('demo') === '1';
+    if (demo) {
+      var now = Date.now();
+      var demoCases = [
+        { id:'demo-001', ref:'SH-D102A', status:'new', priority:true, createdAt:new Date(now-2*3600000).toISOString(), summary:{name:'Arun Kumar',goal:'weight-loss',age:31,sex:'male',bmi:32.4,conditionCount:1,medicationCount:0,allergyCount:0,flags:[]}},
+        { id:'demo-002', ref:'SH-H208B', status:'new', createdAt:new Date(now-19*3600000).toISOString(), summary:{name:'Meera S',goal:'hair-growth',age:27,sex:'female',bmi:23.1,conditionCount:0,medicationCount:1,allergyCount:0,flags:[]}},
+        { id:'demo-003', ref:'SH-S314C', status:'in_review', createdAt:new Date(now-7*3600000).toISOString(), assignedName:'Testing Doctor', summary:{name:'Rahul N',goal:'sexual-health',age:36,sex:'male',bmi:26.8,conditionCount:1,medicationCount:1,allergyCount:1,flags:[]}}
+      ];
+      counts = { new:2, mine:1, in_review:1, awaiting_patient:0, plan_sent:0, closed:0, all_open:3 };
+      var shown = state.tab === 'mine' ? demoCases.filter(function(x){return x.status==='in_review';})
+        : state.tab === 'inbox' ? demoCases.filter(function(x){return x.status==='new';})
+        : state.tab === 'open' ? demoCases : [];
+      if (state.goal) shown = shown.filter(function(x){return (x.summary||{}).goal===state.goal;});
+      if (state.q) { var q=state.q.toLowerCase(); shown=shown.filter(function(x){return ((x.summary||{}).name+' '+x.ref).toLowerCase().indexOf(q)!==-1;}); }
+      renderTabs(); renderLive(); renderList(shown); return;
+    }
     var tab = TABS.filter(function (t) { return t.key === state.tab; })[0] || TABS[0];
     var usp = new URLSearchParams(tab.params);
     if (state.q) usp.set('q', state.q);
